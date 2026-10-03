@@ -1,0 +1,19 @@
+{
+  "plan": {
+    "name": "Enterprise",
+    "docs_per_month": 100000,
+    "docs_used": 41230,
+    "seats": 50,
+    "renews": "2027-01-01"
+  },
+  "webhook_url": "",
+  "api_keys": [
+    { "id": "k-prod", "label": "Production", "prefix": "i2d_live_", "last4": "9f3a", "created": "2026-06-01T09:00:00Z", "active": true }
+  ],
+  "connectors": [
+    { "id": "ecm-sharepoint", "name": "Microsoft SharePoint / M365", "type": "ecm", "status": "disconnected" },
+    { "id": "ecm-opentext", "name": "OpenText Content Suite", "type": "ecm", "status": "disconnected" },
+    { "id": "erp-sap", "name": "SAP S/4HANA", "type": "erp", "status": "connected" },
+    { "id": "customs-zatca", "name": "ZATCA FASAH (Saudi Customs)", "type": "customs", "status": "connected" }
+  ]
+}

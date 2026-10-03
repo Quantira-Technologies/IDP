@@ -1,0 +1,15 @@
+{
+  "doc_type": "goods_receipt_note",
+  "workflow": "po2pay",
+  "title": "Goods Receipt Note",
+  "header_fields": [
+    { "name": "grn_number", "type": "string", "required": true },
+    { "name": "grn_date", "type": "date", "required": true },
+    { "name": "po_number", "type": "string", "required": true },
+    { "name": "vendor", "type": "string", "required": false }
+  ],
+  "line_item_fields": [
+    { "name": "sku", "type": "string", "required": true },
+    { "name": "received_qty", "type": "number", "required": true }
+  ]
+}

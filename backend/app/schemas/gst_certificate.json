@@ -1,0 +1,14 @@
+{
+  "doc_type": "gst_certificate",
+  "workflow": "contracts",
+  "title": "GST Registration Certificate",
+  "header_fields": [
+    { "name": "gstin", "type": "string", "required": true },
+    { "name": "legal_name", "type": "string", "required": true },
+    { "name": "trade_name", "type": "string", "required": false },
+    { "name": "registration_date", "type": "date", "required": false },
+    { "name": "state", "type": "string", "required": false },
+    { "name": "constitution", "type": "string", "required": false }
+  ],
+  "line_item_fields": []
+}

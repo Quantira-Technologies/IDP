@@ -1,0 +1,19 @@
+{
+  "doc_type": "certificate_of_origin",
+  "title": "Certificate of Origin",
+  "header_fields": [
+    { "name": "certificate_number", "type": "string", "required": true },
+    { "name": "exporter", "type": "string", "required": true },
+    { "name": "consignee", "type": "string", "required": false },
+    { "name": "country_of_origin", "type": "string", "required": true },
+    { "name": "destination_country", "type": "string", "required": false },
+    { "name": "invoice_number", "type": "string", "required": false },
+    { "name": "invoice_date", "type": "date", "required": false },
+    { "name": "gross_weight", "type": "string", "required": false }
+  ],
+  "line_item_fields": [
+    { "name": "hs_code", "type": "string", "required": true },
+    { "name": "description", "type": "string", "required": true },
+    { "name": "origin_criterion", "type": "string", "required": false }
+  ]
+}

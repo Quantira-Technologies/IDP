@@ -1,0 +1,309 @@
+{
+  "modules": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "icon": "grid",
+      "description": "Operational overview and KPIs.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "analyze",
+          "label": "Run analysis"
+        }
+      ]
+    },
+    {
+      "id": "documents",
+      "label": "Documents",
+      "icon": "file",
+      "description": "Upload, process and manage documents.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "upload",
+          "label": "Upload"
+        },
+        {
+          "id": "edit",
+          "label": "Edit fields"
+        },
+        {
+          "id": "approve",
+          "label": "Approve"
+        },
+        {
+          "id": "export",
+          "label": "Export"
+        },
+        {
+          "id": "delete",
+          "label": "Delete"
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "label": "Review Queue",
+      "icon": "check",
+      "description": "Human-in-the-loop review of uncertain documents.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "correct",
+          "label": "Correct"
+        },
+        {
+          "id": "approve",
+          "label": "Approve"
+        }
+      ]
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics",
+      "icon": "chart",
+      "description": "Insights, trends and drill-down analysis.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "analyze",
+          "label": "Run analysis"
+        },
+        {
+          "id": "export",
+          "label": "Export"
+        }
+      ]
+    },
+    {
+      "id": "access_control",
+      "label": "Access Control",
+      "icon": "shield",
+      "description": "Manage roles, modules and permissions.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "manage",
+          "label": "Manage roles & permissions"
+        }
+      ]
+    },
+    {
+      "id": "users",
+      "label": "Users",
+      "icon": "users",
+      "description": "Manage people and their role assignments.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "manage",
+          "label": "Manage users"
+        }
+      ]
+    },
+    {
+      "id": "business_rules",
+      "label": "Business Rules",
+      "icon": "rules",
+      "description": "Configure which document types are approved, reviewed or rejected.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "manage",
+          "label": "Configure rules"
+        }
+      ]
+    },
+    {
+      "id": "subscription",
+      "label": "API & Subscription",
+      "icon": "plug",
+      "description": "API keys, plan and ECM/vendor connectors.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "manage",
+          "label": "Manage keys & connectors"
+        }
+      ]
+    },
+    {
+      "id": "user_guide",
+      "label": "User Guide",
+      "icon": "book",
+      "description": "In-app documentation, role-aware.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        },
+        {
+          "id": "manage",
+          "label": "Edit guide"
+        }
+      ]
+    },
+    {
+      "id": "audit",
+      "label": "Audit Log",
+      "icon": "history",
+      "description": "Every action, traceable.",
+      "actions": [
+        {
+          "id": "view",
+          "label": "View"
+        }
+      ]
+    }
+  ],
+  "roles": [
+    {
+      "id": "platform_admin",
+      "label": "Platform Admin",
+      "description": "Full control of the platform, including access control.",
+      "system": true,
+      "permissions": [
+        "access_control.manage",
+        "access_control.view",
+        "analytics.analyze",
+        "analytics.export",
+        "analytics.view",
+        "audit.view",
+        "business_rules.manage",
+        "business_rules.view",
+        "dashboard.analyze",
+        "dashboard.view",
+        "documents.approve",
+        "documents.delete",
+        "documents.edit",
+        "documents.export",
+        "documents.upload",
+        "documents.view",
+        "review.approve",
+        "review.correct",
+        "review.view",
+        "subscription.manage",
+        "subscription.view",
+        "user_guide.manage",
+        "user_guide.view",
+        "users.manage",
+        "users.view"
+      ]
+    },
+    {
+      "id": "tenant_admin",
+      "label": "Tenant Admin",
+      "description": "Owns a tenant: business rules, API/subscription and the user guide.",
+      "permissions": [
+        "dashboard.view",
+        "dashboard.analyze",
+        "documents.view",
+        "documents.upload",
+        "documents.edit",
+        "documents.approve",
+        "documents.export",
+        "review.view",
+        "review.correct",
+        "review.approve",
+        "analytics.view",
+        "analytics.analyze",
+        "analytics.export",
+        "business_rules.view",
+        "business_rules.manage",
+        "subscription.view",
+        "subscription.manage",
+        "user_guide.view",
+        "user_guide.manage",
+        "users.view",
+        "audit.view"
+      ]
+    },
+    {
+      "id": "director",
+      "label": "Director",
+      "description": "Strategic oversight: approvals, analytics and exports.",
+      "permissions": [
+        "dashboard.view",
+        "dashboard.analyze",
+        "documents.view",
+        "documents.approve",
+        "documents.export",
+        "review.view",
+        "review.approve",
+        "analytics.view",
+        "analytics.analyze",
+        "analytics.export",
+        "business_rules.view",
+        "subscription.view",
+        "user_guide.view",
+        "users.view",
+        "audit.view"
+      ]
+    },
+    {
+      "id": "manager",
+      "label": "Manager",
+      "description": "Runs the operation: upload, edit, correct and approve.",
+      "permissions": [
+        "dashboard.view",
+        "dashboard.analyze",
+        "documents.view",
+        "documents.upload",
+        "documents.edit",
+        "documents.approve",
+        "documents.export",
+        "review.view",
+        "review.correct",
+        "review.approve",
+        "analytics.view",
+        "analytics.analyze",
+        "business_rules.view",
+        "user_guide.view"
+      ]
+    },
+    {
+      "id": "customs_officer",
+      "label": "Customs Officer",
+      "description": "Front-line processing: upload, view and correct.",
+      "permissions": [
+        "analytics.view",
+        "business_rules.view",
+        "dashboard.view",
+        "documents.approve",
+        "documents.edit",
+        "documents.export",
+        "documents.upload",
+        "documents.view",
+        "review.approve",
+        "review.correct",
+        "review.view",
+        "user_guide.view"
+      ]
+    }
+  ]
+}

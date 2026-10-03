@@ -1,0 +1,19 @@
+{
+  "doc_type": "vendor_invoice",
+  "workflow": "po2pay",
+  "title": "Vendor Invoice",
+  "header_fields": [
+    { "name": "invoice_number", "type": "string", "required": true },
+    { "name": "invoice_date", "type": "date", "required": true },
+    { "name": "po_number", "type": "string", "required": true },
+    { "name": "vendor", "type": "string", "required": false },
+    { "name": "currency", "type": "string", "required": true },
+    { "name": "grand_total", "type": "number", "required": true }
+  ],
+  "line_item_fields": [
+    { "name": "sku", "type": "string", "required": true },
+    { "name": "billed_qty", "type": "number", "required": true },
+    { "name": "unit_price", "type": "number", "required": true },
+    { "name": "amount", "type": "number", "required": true }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "doc_type": "customs_declaration",
+  "workflow": "customs",
+  "title": "Customs Declaration (Traveler)",
+  "header_fields": [
+    { "name": "first_name", "type": "string", "required": true },
+    { "name": "father_name", "type": "string", "required": false },
+    { "name": "surname", "type": "string", "required": true },
+    { "name": "nationality", "type": "string", "required": true },
+    { "name": "date_of_birth", "type": "date", "required": false },
+    { "name": "passport_number", "type": "string", "required": true },
+    { "name": "mobile", "type": "string", "required": false },
+    { "name": "address", "type": "string", "required": false },
+    { "name": "email", "type": "string", "required": false },
+    { "name": "purpose_of_travel", "type": "string", "required": false },
+    { "name": "arriving_from", "type": "string", "required": false },
+    { "name": "departing_to", "type": "string", "required": false },
+    { "name": "flight_number", "type": "string", "required": false }
+  ],
+  "line_item_fields": [
+    { "name": "description", "type": "string", "required": false },
+    { "name": "quantity", "type": "number", "required": false },
+    { "name": "amount", "type": "number", "required": false }
+  ]
+}

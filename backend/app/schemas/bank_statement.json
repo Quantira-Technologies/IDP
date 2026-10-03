@@ -1,0 +1,19 @@
+{
+  "doc_type": "bank_statement",
+  "workflow": "finance",
+  "title": "Bank Statement",
+  "header_fields": [
+    { "name": "account_number", "type": "string", "required": true },
+    { "name": "statement_period", "type": "string", "required": true },
+    { "name": "opening_balance", "type": "number", "required": true },
+    { "name": "closing_balance", "type": "number", "required": true },
+    { "name": "currency", "type": "string", "required": false }
+  ],
+  "line_item_fields": [
+    { "name": "date", "type": "date", "required": true },
+    { "name": "description", "type": "string", "required": false },
+    { "name": "credit", "type": "number", "required": false },
+    { "name": "debit", "type": "number", "required": false },
+    { "name": "balance", "type": "number", "required": true }
+  ]
+}

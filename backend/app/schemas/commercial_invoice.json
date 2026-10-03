@@ -1,0 +1,23 @@
+{
+  "doc_type": "commercial_invoice",
+  "title": "Commercial Invoice",
+  "header_fields": [
+    { "name": "invoice_number", "type": "string", "required": true },
+    { "name": "invoice_date", "type": "date", "required": true },
+    { "name": "exporter", "type": "string", "required": false },
+    { "name": "consignee", "type": "string", "required": false },
+    { "name": "po_number", "type": "string", "required": false },
+    { "name": "currency", "type": "string", "required": true },
+    { "name": "total_quantity", "type": "number", "required": false },
+    { "name": "grand_total", "type": "number", "required": true },
+    { "name": "amount_in_words", "type": "string", "required": false }
+  ],
+  "line_item_fields": [
+    { "name": "hs_code", "type": "string", "required": true },
+    { "name": "description", "type": "string", "required": true },
+    { "name": "quantity", "type": "number", "required": true },
+    { "name": "unit_price", "type": "number", "required": true },
+    { "name": "amount", "type": "number", "required": true },
+    { "name": "applied_duty_rate", "type": "number", "required": false }
+  ]
+}

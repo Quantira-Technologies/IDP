@@ -1,0 +1,52 @@
+{
+  "sections": [
+    {
+      "id": "getting-started",
+      "title": "Getting started",
+      "permission": null,
+      "body": "Welcome to **intel2doc**. Sign in and use the left navigation to move between areas. Your role determines what you can see and do. Use the theme toggle (top bar) to switch between light and dark, and collapse the sidebar for more space."
+    },
+    {
+      "id": "scanning",
+      "title": "Uploading & scanning documents",
+      "permission": "documents.upload",
+      "body": "Go to **Documents** and drag a file onto the dropzone (or click Upload). The image is auto-cleaned, then fully OCR'd — every line, key/value pair, table and QR code is extracted. Watch the scan animation for progress. Your results are saved under **Past scans** and can be organised into folders."
+    },
+    {
+      "id": "review",
+      "title": "Reviewing & approving",
+      "permission": "review.view",
+      "body": "Open a scan to review. Each field shows a confidence score and is traced to the page. Correct any value inline. When everything looks right, click **Approve & secure** — the document moves to the approved state and can be exported to your ECM/ERP or API."
+    },
+    {
+      "id": "folders",
+      "title": "Organising with folders",
+      "permission": "documents.view",
+      "body": "In **Documents → Past scans** you can create folders (like on your computer), rename and delete them, and move scans between them. Folders are private to you."
+    },
+    {
+      "id": "business-rules",
+      "title": "Business rules",
+      "permission": "business_rules.view",
+      "body": "Business rules decide what happens to each document type: **auto-approve**, **review**, or **reject**. As an officer, the applied rule is shown on every scan so you know why a document was routed the way it was. Tenant admins configure these under **Business Rules**."
+    },
+    {
+      "id": "analytics",
+      "title": "Analytics",
+      "permission": "analytics.view",
+      "body": "The **Analytics** area shows trade insight: which origin countries send the most consignments, the busiest trade lanes, and which countries have the highest/lowest extraction confidence — so you can focus review effort where it matters."
+    },
+    {
+      "id": "api",
+      "title": "API & ECM integration",
+      "permission": "subscription.view",
+      "body": "Under **API & Subscription** you can generate API keys and connect ECM/ERP systems (SharePoint, OpenText, SAP, ZATCA FASAH). Approved documents can be pushed to any connected system or your webhook."
+    },
+    {
+      "id": "access-control",
+      "title": "Access control",
+      "permission": "access_control.view",
+      "body": "Platform admins manage roles and permissions under **Access Control**. Toggle any permission for any role; changes take effect immediately."
+    }
+  ]
+}

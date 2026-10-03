@@ -1,0 +1,7 @@
+{
+  "7318.15.00": { "description": "Threaded fasteners / anchor bolts (steel)", "duty_rate": 7.5 },
+  "8716.80.9000": { "description": "Hand carts / shopping carts", "duty_rate": 10.0 },
+  "4016.99.9000": { "description": "Articles of vulcanised rubber", "duty_rate": 10.0 },
+  "5101.29": { "description": "Scoured sheep wool, not carded/combed", "duty_rate": 2.5 },
+  "8471.30": { "description": "Portable data-processing machines", "duty_rate": 0.0 }
+}

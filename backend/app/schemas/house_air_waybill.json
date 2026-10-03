@@ -1,0 +1,23 @@
+{
+  "doc_type": "house_air_waybill",
+  "workflow": "customs",
+  "title": "House Air Waybill",
+  "header_fields": [
+    { "name": "hawb_number", "type": "string", "required": true },
+    { "name": "carrier", "type": "string", "required": false },
+    { "name": "shipper", "type": "string", "required": false },
+    { "name": "consignee", "type": "string", "required": false },
+    { "name": "airport_of_departure", "type": "string", "required": true },
+    { "name": "airport_of_destination", "type": "string", "required": true },
+    { "name": "flight_number", "type": "string", "required": false },
+    { "name": "issue_date", "type": "date", "required": false },
+    { "name": "currency", "type": "string", "required": false },
+    { "name": "terms", "type": "string", "required": false },
+    { "name": "nature_of_goods", "type": "string", "required": false },
+    { "name": "gross_weight", "type": "number", "required": true },
+    { "name": "chargeable_weight", "type": "number", "required": true },
+    { "name": "declared_value_for_carriage", "type": "string", "required": false },
+    { "name": "declared_value_for_customs", "type": "string", "required": false }
+  ],
+  "line_item_fields": []
+}

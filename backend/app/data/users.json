@@ -1,0 +1,49 @@
+{
+  "users": [
+    {
+      "id": "u-admin",
+      "username": "admin",
+      "name": "Layla Al-Rashid",
+      "title": "Platform Administrator",
+      "email": "admin@intel2doc.sa",
+      "role": "platform_admin",
+      "password_hash": "fdf122fdf57875f798d6b934c6408736cbee1e39bfe5939ba6beeeaa2ce0e6cc"
+    },
+    {
+      "id": "u-tenant",
+      "username": "tenantadmin",
+      "name": "Faisal Al-Mutairi",
+      "title": "Tenant Administrator",
+      "email": "tenant@intel2doc.sa",
+      "role": "tenant_admin",
+      "password_hash": "eaca598bb3f1fe2798cfe1d9502eacc9b9c54b6ee9db67bf105c045fecb51ad6"
+    },
+    {
+      "id": "u-director",
+      "username": "director",
+      "name": "Khalid Al-Otaibi",
+      "title": "Director, Customs Operations",
+      "email": "director@intel2doc.sa",
+      "role": "director",
+      "password_hash": "d41eb236ec1ff9163a92b62c59b23b4f54d146d36674d6d4760164e674e81e5c"
+    },
+    {
+      "id": "u-manager",
+      "username": "manager",
+      "name": "Sara Al-Harbi",
+      "title": "Operations Manager",
+      "email": "manager@intel2doc.sa",
+      "role": "manager",
+      "password_hash": "a840e4fb4f859fc3e602eb887b4b8720123983ffa93623d654bc3190c906fc68"
+    },
+    {
+      "id": "u-officer",
+      "username": "officer",
+      "name": "Omar Al-Ghamdi",
+      "title": "Customs Officer",
+      "email": "officer@intel2doc.sa",
+      "role": "customs_officer",
+      "password_hash": "2dbb2323f24f697716f2b5cbb9f910025295209875d4761324e8c73eab1d98e6"
+    }
+  ]
+}

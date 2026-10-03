@@ -1,0 +1,19 @@
+{
+  "doc_type": "purchase_order",
+  "workflow": "po2pay",
+  "title": "Purchase Order",
+  "header_fields": [
+    { "name": "po_number", "type": "string", "required": true },
+    { "name": "po_date", "type": "date", "required": true },
+    { "name": "vendor", "type": "string", "required": true },
+    { "name": "currency", "type": "string", "required": true },
+    { "name": "grand_total", "type": "number", "required": true }
+  ],
+  "line_item_fields": [
+    { "name": "sku", "type": "string", "required": true },
+    { "name": "description", "type": "string", "required": false },
+    { "name": "ordered_qty", "type": "number", "required": true },
+    { "name": "unit_price", "type": "number", "required": true },
+    { "name": "amount", "type": "number", "required": true }
+  ]
+}
