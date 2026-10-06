@@ -8,12 +8,47 @@
   },
   "webhook_url": "",
   "api_keys": [
-    { "id": "k-prod", "label": "Production", "prefix": "i2d_live_", "last4": "9f3a", "created": "2026-06-01T09:00:00Z", "active": true }
+    {
+      "id": "k-prod",
+      "label": "Production",
+      "prefix": "i2d_live_",
+      "last4": "9f3a",
+      "created": "2026-06-01T09:00:00Z",
+      "active": true
+    },
+    {
+      "id": "k-93726c89",
+      "label": "New key",
+      "prefix": "i2d_live_",
+      "last4": "3193",
+      "created": "2026-09-30T07:59:09.011297+00:00",
+      "active": true
+    }
   ],
   "connectors": [
-    { "id": "ecm-sharepoint", "name": "Microsoft SharePoint / M365", "type": "ecm", "status": "disconnected" },
-    { "id": "ecm-opentext", "name": "OpenText Content Suite", "type": "ecm", "status": "disconnected" },
-    { "id": "erp-sap", "name": "SAP S/4HANA", "type": "erp", "status": "connected" },
-    { "id": "customs-zatca", "name": "ZATCA FASAH (Saudi Customs)", "type": "customs", "status": "connected" }
+    {
+      "id": "ecm-sharepoint",
+      "name": "Microsoft SharePoint / M365",
+      "type": "ecm",
+      "status": "disconnected"
+    },
+    {
+      "id": "ecm-opentext",
+      "name": "OpenText Content Suite",
+      "type": "ecm",
+      "status": "disconnected"
+    },
+    {
+      "id": "erp-sap",
+      "name": "SAP S/4HANA",
+      "type": "erp",
+      "status": "connected"
+    },
+    {
+      "id": "customs-zatca",
+      "name": "ZATCA FASAH (Saudi Customs)",
+      "type": "customs",
+      "status": "connected"
+    }
   ]
 }

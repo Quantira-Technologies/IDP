@@ -35,12 +35,17 @@ class Settings(BaseSettings):
     sso_enabled: bool = True
     sso_provider_label: str = "Nafath / Azure AD (SSO)"
 
-    # ---- Ollama vision extraction (only used when extractor == "ollama") ---- #
-    # Local Ollama server and the multimodal model to use. The client wants
-    # qwen2.5vl:3b — pull it once with `ollama pull qwen2.5vl:3b`.
-    ollama_host: str = "http://localhost:11434"
+    # ---- Ollama / AI gateway extraction ---- #
+    # Works with a local Ollama server OR a hosted, OpenAI/Ollama-compatible
+    # gateway (e.g. https://ai.quantrexfintech.com). The native chat path is
+    # `<host>/api/chat`; the OpenAI-compatible base is `<host>/v1`.
+    #   EXTRACTOR=ollama       -> vision model reads the image directly (e.g. qwen2.5vl:3b)
+    #   EXTRACTOR=ollama_text  -> OCR (Tesseract) -> text chat model (e.g. qwen2.5:1.5b)
+    ollama_host: str = "https://ai.quantrexfintech.com"
     ollama_model: str = "qwen2.5vl:3b"
     ollama_timeout: float = 120.0
+    # Bearer token for a hosted gateway. Leave unset for a local Ollama server.
+    ollama_api_key: str = "e09566c78f3d80280dc17a32cdc422d45e284713150ad16968792798"
 
     # Folder of sample document images used by the /api/assets endpoints.
     assets_dir: str = "../assets"

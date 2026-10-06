@@ -5,7 +5,9 @@ import {
   type Folder, type ScanMeta,
 } from "../api";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 import { DetectedTable, FullText, QRCodes, ApprovedScreen } from "../components/Extraction";
+import { EngineBadge } from "../components/AiStatus";
 import { FieldList } from "../components/FieldList";
 import { Icon } from "../components/Icons";
 import { PagePreview } from "../components/PagePreview";
@@ -32,6 +34,7 @@ const when = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "");
 
 export function Documents() {
   const { can, user } = useAuth();
+  const { t } = useI18n();
   const [result, setResult] = useState<DocumentResult | null>(null);
   const [approved, setApproved] = useState(false);
   const [activeSub, setActiveSub] = useState(0);
@@ -147,10 +150,10 @@ export function Documents() {
       <div className="page">
         <div className="page-head">
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button className="icon-btn" onClick={reset} title="Back"><Icon name="back" size={18} /></button>
-            <div><h2>Review &amp; validate</h2><p>Every field is traced to the page — correct anything, then approve.</p></div>
+            <button className="icon-btn" onClick={reset} title={t("Back")}><Icon name="back" size={18} /></button>
+            <div><h2>{t("Review & validate")}</h2><p>{t("Every field is traced to the page — correct anything, then approve.")}</p></div>
           </div>
-          <div className="page-actions"><button className="btn btn-ghost" onClick={reset}>← Back to documents</button></div>
+          <div className="page-actions"><button className="btn btn-ghost" onClick={reset}>{t("← Back to documents")}</button></div>
         </div>
         {error && <div className="alert">⚠ {error}</div>}
         <div className="review">
@@ -164,13 +167,13 @@ export function Documents() {
               ))}
             </div>
             <div className="panel">
-              <div className="panel-head"><h3>Source — {pretty(sub.doc_type)}</h3><span className="chip-label">{sub.engine}</span></div>
+              <div className="panel-head"><h3>{t("Source")} — {pretty(sub.doc_type)}</h3><EngineBadge engine={sub.extraction.engine} /></div>
               <div className="panel-body"><PagePreview sub={sub} activeField={activeField} onPick={setActiveField} imageUrl={previewImage} /></div>
             </div>
           </div>
           <div className="review-right">
             <div className="panel">
-              <div className="panel-head"><h3>Extracted data &amp; checks</h3><span className="chip-label">{Object.keys(sub.extraction.fields).length} fields</span></div>
+              <div className="panel-head"><h3>{t("Extracted data & checks")}</h3><span className="chip-label">{Object.keys(sub.extraction.fields).length} {t("fields")}</span></div>
               <div className="panel-body">
                 <RouteBanner sub={sub} />
                 <RuleResults sub={sub} />
@@ -178,9 +181,9 @@ export function Documents() {
                 {canApprove && sub.route !== "rejected" && (
                   <div className="approve-bar">
                     <button className="btn btn-primary" onClick={() => onCorrect(Object.keys(sub.extraction.fields)[0], String(sub.extraction.fields[Object.keys(sub.extraction.fields)[0]]?.value ?? ""), true)}>
-                      <Icon name="shield" size={16} /> Approve &amp; secure
+                      <Icon name="shield" size={16} /> {t("Approve & secure")}
                     </button>
-                    <span className="approve-hint">Validates and moves the document to Approved.</span>
+                    <span className="approve-hint">{t("Validates and moves the document to Approved.")}</span>
                   </div>
                 )}
               </div>
@@ -202,7 +205,7 @@ export function Documents() {
         subtitle="Upload any document — it's cleaned, fully OCR'd, and saved to your past scans"
         actions={canUpload && (
           <>
-            <button className="btn btn-primary" onClick={() => fileRef.current?.click()}><Icon name="upload" size={17} /> Upload document</button>
+            <button className="btn btn-primary" onClick={() => fileRef.current?.click()}><Icon name="upload" size={17} /> {t("Upload document")}</button>
             <input ref={fileRef} type="file" accept="image/*,.pdf" onChange={onUpload} hidden />
           </>
         )}
@@ -211,38 +214,38 @@ export function Documents() {
       {canUpload && (
         <div className="dropzone" data-tour="dropzone" onClick={() => fileRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) onDropFile(f); }}>
           <div className="dz-icon"><Icon name="upload" size={30} /></div>
-          <div className="dz-title">Drop a document here or click to upload</div>
-          <div className="dz-sub">JPG, PNG or PDF · auto-cleaned & fully OCR'd · QR codes captured separately</div>
+          <div className="dz-title">{t("Drop a document here or click to upload")}</div>
+          <div className="dz-sub">{t("JPG, PNG or PDF · auto-cleaned & fully OCR'd · QR codes captured separately")}</div>
         </div>
       )}
 
-      <div className="section-title">Past scans</div>
+      <div className="section-title">{t("Past scans")}</div>
       <div className="docs-layout">
         <div className="folders" data-tour="folders">
           <div className="folders-head">
-            <span className="folders-title">Folders</span>
+            <span className="folders-title">{t("Folders")}</span>
           </div>
           <button className={`folder ${activeFolder === "__all__" ? "active" : ""}`} onClick={() => setActiveFolder("__all__")}>
-            <Icon name="grid" size={16} /> All scans <span className="fcount">{scans.length}</span>
+            <Icon name="grid" size={16} /> {t("All scans")} <span className="fcount">{scans.length}</span>
           </button>
           <button className={`folder ${activeFolder === "__root__" ? "active" : ""}`} onClick={() => setActiveFolder("__root__")}>
-            <Icon name="file" size={16} /> Unfiled
+            <Icon name="file" size={16} /> {t("Unfiled")}
           </button>
           {folders.map((f) => (
             <button key={f.id} className={`folder ${activeFolder === f.id ? "active" : ""}`} onClick={() => setActiveFolder(f.id)}>
               <Icon name="folder" size={16} /> {f.name} <span className="fcount">{f.count}</span>
-              <span className="fdel" onClick={(e) => { e.stopPropagation(); removeFolder(f.id); }} title="Delete folder"><Icon name="trash" size={14} /></span>
+              <span className="fdel" onClick={(e) => { e.stopPropagation(); removeFolder(f.id); }} title={t("Delete folder")}><Icon name="trash" size={14} /></span>
             </button>
           ))}
           <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-            <input value={newFolder} onChange={(e) => setNewFolder(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addFolder()} placeholder="New folder" style={{ flex: 1, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 9, background: "var(--panel-2)", color: "var(--ink)", fontSize: 12.5 }} />
-            <button className="icon-btn" onClick={addFolder} title="Create folder"><Icon name="folderPlus" size={16} /></button>
+            <input value={newFolder} onChange={(e) => setNewFolder(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addFolder()} placeholder={t("New folder")} style={{ flex: 1, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 9, background: "var(--panel-2)", color: "var(--ink)", fontSize: 12.5 }} />
+            <button className="icon-btn" onClick={addFolder} title={t("Create folder")}><Icon name="folderPlus" size={16} /></button>
           </div>
         </div>
 
         <div className="scan-list">
           {scans.length === 0 ? (
-            <div className="empty"><Icon name="file" size={40} /><div style={{ marginTop: 10 }}>No scans yet. Upload a document to get started.</div></div>
+            <div className="empty"><Icon name="file" size={40} /><div style={{ marginTop: 10 }}>{t("No scans yet. Upload a document to get started.")}</div></div>
           ) : (
             scans.map((s) => (
               <div className="scan-row" key={s.id}>
@@ -258,8 +261,8 @@ export function Documents() {
                   {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                 </select>
                 <div className="scan-actions">
-                  <button className="mini-btn" onClick={() => openScan(s.id)}>Open</button>
-                  <button className="icon-btn" onClick={() => removeScan(s.id)} title="Delete" style={{ width: 32, height: 32 }}><Icon name="trash" size={15} /></button>
+                  <button className="mini-btn" onClick={() => openScan(s.id)}>{t("Open")}</button>
+                  <button className="icon-btn" onClick={() => removeScan(s.id)} title={t("Delete")} style={{ width: 32, height: 32 }}><Icon name="trash" size={15} /></button>
                 </div>
               </div>
             ))
@@ -271,9 +274,10 @@ export function Documents() {
 }
 
 export function PageHead({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+  const { t } = useI18n();
   return (
     <div className="page-head">
-      <div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>
+      <div><h2>{t(title)}</h2>{subtitle && <p>{t(subtitle)}</p>}</div>
       {actions && <div className="page-actions">{actions}</div>}
     </div>
   );

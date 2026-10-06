@@ -54,10 +54,11 @@ class Extractor(abc.ABC):
 def get_extractor(raw: "RawDocument | None" = None) -> Extractor:
     """Factory driven by the EXTRACTOR env setting (image-aware).
 
-    - "ollama"  → vision LLM (needs an image + a running Ollama server)
-    - "ocr"     → Tesseract OCR for images
-    - "auto"    → OCR when an image is present and Tesseract is installed, else mock
-    - "mock"    → offline deterministic sample data (default)
+    - "ollama"      → vision LLM (needs an image + a running Ollama server)
+    - "ollama_text" → OCR (Tesseract) then a text chat model (e.g. qwen2.5:1.5b)
+    - "ocr"         → Tesseract OCR for images
+    - "auto"        → OCR when an image is present and Tesseract is installed, else mock
+    - "mock"        → offline deterministic sample data (default)
     """
     mode = settings.extractor
     has_image = raw is not None and raw.has_image
@@ -66,6 +67,10 @@ def get_extractor(raw: "RawDocument | None" = None) -> Extractor:
         from .ollama_extractor import OllamaExtractor
 
         return OllamaExtractor()
+    if mode == "ollama_text":
+        from .ollama_text_extractor import OllamaTextExtractor
+
+        return OllamaTextExtractor()
     if mode == "llm":
         from .llm_extractor import LLMExtractor
 

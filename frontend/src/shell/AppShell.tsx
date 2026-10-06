@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 import { Icon } from "../components/Icons";
+import { AiStatusPill } from "../components/AiStatus";
 import { Tutorials } from "../components/Tutorials";
 import { getTheme, toggleTheme, type Theme } from "../theme";
 import { Dashboard } from "../pages/Dashboard";
@@ -29,6 +31,7 @@ const pretty = (s: string) => s.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c
 
 export function AppShell() {
   const { user, logout, can } = useAuth();
+  const { t, lang, toggle: toggleLang } = useI18n();
   const items = useMemo(() => NAV.filter((n) => can(n.perm)), [can]);
   const navIds = useMemo(() => items.map((i) => i.id), [items]);
   const [active, setActive] = useState(items[0]?.id ?? "dashboard");
@@ -60,39 +63,44 @@ export function AppShell() {
         <div className="side-brand">
           <span className="side-mark"><Icon name="logo" size={22} /></span>
           <span className="side-name">intel<span className="accent">2</span>doc</span>
-          <button className="collapse-btn only-desktop" onClick={toggleCollapse} title="Collapse" aria-label="Collapse sidebar">
+          <button className="collapse-btn only-desktop" onClick={toggleCollapse} title={t("Collapse sidebar")} aria-label={t("Collapse sidebar")}>
             <Icon name={collapsed ? "chevron" : "back"} size={16} />
           </button>
-          <button className="side-close" onClick={() => setMobileOpen(false)} aria-label="Close menu"><Icon name="x" size={18} /></button>
+          <button className="side-close" onClick={() => setMobileOpen(false)} aria-label={t("Close menu")}><Icon name="x" size={18} /></button>
         </div>
         <nav className="side-nav">
           {items.map((n) => (
-            <button key={n.id} data-tour={`nav-${n.id}`} className={`side-link ${active === n.id ? "active" : ""}`} onClick={() => { setActive(n.id); setMobileOpen(false); }} title={n.label}>
+            <button key={n.id} data-tour={`nav-${n.id}`} className={`side-link ${active === n.id ? "active" : ""}`} onClick={() => { setActive(n.id); setMobileOpen(false); }} title={t(n.label)}>
               <Icon name={n.icon} size={19} />
-              <span>{n.label}</span>
+              <span>{t(n.label)}</span>
             </button>
           ))}
         </nav>
         <div className="side-foot">
-          <div className="side-org"><span className="org-dot" /><span>Saudi Customs · Workspace</span></div>
+          <div className="side-org"><span className="org-dot" /><span>{t("Saudi Customs · Workspace")}</span></div>
         </div>
       </aside>
 
       <div className="main">
         <header className="topbar">
-          <button className="icon-btn only-mobile" onClick={() => setMobileOpen(true)} aria-label="Open menu"><Icon name="menu" size={20} /></button>
+          <button className="icon-btn only-mobile" onClick={() => setMobileOpen(true)} aria-label={t("Open menu")}><Icon name="menu" size={20} /></button>
           <div className="crumb">
             <span className="crumb-app">intel2doc</span>
             <span className="crumb-sep">/</span>
-            <span className="crumb-page">{current?.label}</span>
+            <span className="crumb-page">{t(current?.label ?? "")}</span>
           </div>
           <div className="topbar-spacer" />
-          <button className="icon-btn" data-tour="tutorials-btn" onClick={() => setTutorialSignal((s) => s + 1)} title="Tutorials"><Icon name="play" size={18} /></button>
-          <div className="theme-toggle" data-tour="theme-toggle" role="group" aria-label="Theme">
-            <button className={theme === "light" ? "on" : ""} onClick={() => theme !== "light" && onTheme()} title="Light"><Icon name="sun" size={15} /></button>
-            <button className={theme === "dark" ? "on" : ""} onClick={() => theme !== "dark" && onTheme()} title="Dark"><Icon name="moon" size={15} /></button>
+          <AiStatusPill />
+          <button className="icon-btn" data-tour="tutorials-btn" onClick={() => setTutorialSignal((s) => s + 1)} title={t("Tutorials")}><Icon name="play" size={18} /></button>
+          <div className="theme-toggle lang-toggle" role="group" aria-label={t("Language")}>
+            <button className={lang === "en" ? "on" : ""} onClick={() => lang !== "en" && toggleLang()} title="English">EN</button>
+            <button className={lang === "ar" ? "on" : ""} onClick={() => lang !== "ar" && toggleLang()} title="العربية">ع</button>
           </div>
-          <button className="icon-btn" aria-label="Notifications"><Icon name="bell" size={19} /></button>
+          <div className="theme-toggle" data-tour="theme-toggle" role="group" aria-label={t("Language")}>
+            <button className={theme === "light" ? "on" : ""} onClick={() => theme !== "light" && onTheme()} title={t("Light")}><Icon name="sun" size={15} /></button>
+            <button className={theme === "dark" ? "on" : ""} onClick={() => theme !== "dark" && onTheme()} title={t("Dark")}><Icon name="moon" size={15} /></button>
+          </div>
+          <button className="icon-btn" aria-label={t("Notifications")}><Icon name="bell" size={19} /></button>
           <div className="user-menu">
             <button className="user-btn" onClick={() => setMenuOpen((o) => !o)}>
               <span className="avatar">{user?.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}</span>
@@ -114,9 +122,9 @@ export function AppShell() {
                     </div>
                   </div>
                   <div className="menu-sep" />
-                  <div className="menu-perms">{user?.permissions.length} permissions</div>
-                  <button className="menu-item" onClick={() => { setMenuOpen(false); setTutorialSignal((s) => s + 1); }}><Icon name="play" size={17} /> Replay tutorial</button>
-                  <button className="menu-item danger" onClick={logout}><Icon name="logout" size={17} /> Sign out</button>
+                  <div className="menu-perms">{user?.permissions.length} {t("permissions")}</div>
+                  <button className="menu-item" onClick={() => { setMenuOpen(false); setTutorialSignal((s) => s + 1); }}><Icon name="play" size={17} /> {t("Replay tutorial")}</button>
+                  <button className="menu-item danger" onClick={logout}><Icon name="logout" size={17} /> {t("Sign out")}</button>
                 </div>
               </>
             )}
