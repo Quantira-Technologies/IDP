@@ -3,7 +3,7 @@ name: Deploy Intel2Doc to EKS
 on:
   push:
     branches:
-      - main
+      - dev
     paths:
       - "backend/**"
       - "frontend/**"
