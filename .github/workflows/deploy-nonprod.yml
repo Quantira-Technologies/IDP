@@ -1,0 +1,135 @@
+name: Deploy Intel2Doc to EKS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "k8s/**"
+      - ".github/workflows/deploy-nonprod.yml"
+
+concurrency:
+  group: intel2doc-nonprod
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ap-south-2
+  AWS_ACCOUNT_ID: "104680212681"
+
+  EKS_CLUSTER: qt-nonprod-cluster
+  K8S_NAMESPACE: intel2doc
+
+  BACKEND_REPO: intel2doc-backend
+  FRONTEND_REPO: intel2doc-frontend
+
+  BACKEND_DEPLOYMENT: intel2doc-backend
+  FRONTEND_DEPLOYMENT: intel2doc-frontend
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Show deployment information
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Runner: $RUNNER_NAME"
+
+      - name: Configure variables
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+
+          echo "IMAGE_TAG=${SHORT_SHA}" >> "$GITHUB_ENV"
+
+          echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "$GITHUB_ENV"
+
+          echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${SHORT_SHA}" >> "$GITHUB_ENV"
+
+          echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${SHORT_SHA}" >> "$GITHUB_ENV"
+
+      - name: Verify AWS identity
+        run: |
+          aws sts get-caller-identity
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password \
+            --region "$AWS_REGION" \
+          | docker login \
+            --username AWS \
+            --password-stdin "$ECR_REGISTRY"
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name "$EKS_CLUSTER" \
+            --region "$AWS_REGION"
+
+          kubectl get nodes
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t "$BACKEND_IMAGE" \
+            ./backend
+
+      - name: Push backend image
+        run: |
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            --build-arg VITE_API_BASE="" \
+            -t "$FRONTEND_IMAGE" \
+            ./frontend
+
+      - name: Push frontend image
+        run: |
+          docker push "$FRONTEND_IMAGE"
+
+      - name: Deploy backend to EKS
+        run: |
+          kubectl set image \
+            deployment/"$BACKEND_DEPLOYMENT" \
+            backend="$BACKEND_IMAGE" \
+            -n "$K8S_NAMESPACE"
+
+      - name: Wait for backend rollout
+        run: |
+          kubectl rollout status \
+            deployment/"$BACKEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" \
+            --timeout=300s
+
+      - name: Deploy frontend to EKS
+        run: |
+          kubectl set image \
+            deployment/"$FRONTEND_DEPLOYMENT" \
+            frontend="$FRONTEND_IMAGE" \
+            -n "$K8S_NAMESPACE"
+
+      - name: Wait for frontend rollout
+        run: |
+          kubectl rollout status \
+            deployment/"$FRONTEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" \
+            --timeout=300s
+
+      - name: Show deployed resources
+        run: |
+          kubectl get deployment,pods,svc,ingress \
+            -n "$K8S_NAMESPACE"
+
+      - name: Verify backend health
+        run: |
+          curl --fail \
+            --retry 10 \
+            --retry-delay 5 \
+            https://idp.quantrexfintech.com/api/health
