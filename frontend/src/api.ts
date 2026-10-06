@@ -4,7 +4,7 @@ const env = (import.meta as unknown as {
   env: { VITE_API_BASE?: string };
 }).env;
 
-const API_BASE = env.VITE_API_BASE || "http://localhost:8020";
+const API_BASE = env.VITE_API_BASE || "";
 export const apiBase = API_BASE;
 
 const TOKEN_KEY = "intel2doc_token";
@@ -69,7 +69,14 @@ export interface HealthInfo {
   ocr_available: boolean;
   workflows: string[];
   assets: string[];
-  ollama?: { reachable: boolean; model_available: boolean; model: string };
+  ollama?: {
+    reachable: boolean;
+    model_available: boolean | null;
+    model: string;
+    host?: string;
+    authenticated?: boolean;
+    error?: string;
+  };
 }
 export interface RbacModule {
   id: string;

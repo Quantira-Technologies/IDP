@@ -408,6 +408,43 @@ code { font-family: var(--mono); background: #eef2f4; padding: 1px 5px; border-r
 .theme-toggle { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
 .theme-toggle button { border: none; background: transparent; color: var(--ink-faint); width: 30px; height: 26px; border-radius: 999px; display: grid; place-items: center; }
 .theme-toggle button.on { background: var(--teal); color: #fff; }
+.lang-toggle button { width: auto; min-width: 30px; padding: 0 10px; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+
+/* ---------- AI status pill (topbar) ---------- */
+.ai-pill { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 650; letter-spacing: .1px; border: 1px solid transparent; white-space: nowrap; user-select: none; }
+.ai-pill .ai-pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+.ai-pill.ai-on { color: #0a7a5c; background: linear-gradient(180deg, rgba(16,163,127,.14), rgba(16,163,127,.08)); border-color: rgba(16,163,127,.34); }
+.ai-pill.ai-on .ai-pill-dot { background: #10a37f; box-shadow: 0 0 0 0 rgba(16,163,127,.55); animation: aiPulse 1.9s ease-out infinite; }
+.ai-pill.ai-on svg { color: #10a37f; }
+.ai-pill.ai-off { color: #a35a12; background: linear-gradient(180deg, rgba(214,158,46,.15), rgba(214,158,46,.08)); border-color: rgba(214,158,46,.38); }
+.ai-pill.ai-off .ai-pill-dot { background: #d69e2e; }
+.ai-pill.ai-off svg { color: #d69e2e; }
+@keyframes aiPulse { 0% { box-shadow: 0 0 0 0 rgba(16,163,127,.5); } 70% { box-shadow: 0 0 0 7px rgba(16,163,127,0); } 100% { box-shadow: 0 0 0 0 rgba(16,163,127,0); } }
+@media (max-width: 720px) { .ai-pill .ai-pill-text { display: none; } .ai-pill { padding: 0 9px; } }
+
+/* ---------- Engine badge (per document) ---------- */
+.engine-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650; border: 1px solid transparent; white-space: nowrap; }
+.engine-badge .eb-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 0 currentColor; animation: aiPulse 1.9s ease-out infinite; }
+.engine-badge.eb-ai { color: #0a7a5c; background: rgba(16,163,127,.12); border-color: rgba(16,163,127,.32); }
+.engine-badge.eb-fallback { color: #a35a12; background: rgba(214,158,46,.14); border-color: rgba(214,158,46,.34); }
+.engine-badge.eb-ocr { color: #0b64d1; background: rgba(11,100,209,.1); border-color: rgba(11,100,209,.28); }
+.engine-badge.eb-sample { color: var(--ink-faint); background: var(--panel-2); border-color: var(--line); }
+.approved-engine { margin-top: 12px; display: flex; justify-content: center; }
+.approved-engine .engine-badge { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.3); color: #fff; font-size: 12.5px; padding: 6px 13px; }
+
+html[data-theme="dark"] .ai-pill.ai-on { color: #4bd6b0; }
+html[data-theme="dark"] .ai-pill.ai-off { color: #f0c069; }
+html[data-theme="dark"] .engine-badge.eb-ai { color: #4bd6b0; }
+html[data-theme="dark"] .engine-badge.eb-fallback { color: #f0c069; }
+html[data-theme="dark"] .engine-badge.eb-ocr { color: #6aa9f0; }
+.login-lang { position: absolute; top: 18px; inset-inline-end: 18px; z-index: 5; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: var(--shadow); }
+.login-lang:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ---------- RTL (Arabic) ---------- */
+[dir="rtl"] .side-link, [dir="rtl"] .folder, [dir="rtl"] .menu-item { text-align: right; }
+[dir="rtl"] .crumb-sep { transform: scaleX(-1); }
+[dir="rtl"] .kpi-trend, [dir="rtl"] .insight { direction: rtl; }
+[dir="rtl"] .collapse-btn svg, [dir="rtl"] .side-link .chevron { transform: scaleX(-1); }
 
 /* ---------- Business rules page ---------- */
 .rules-cfg { display: grid; gap: 10px; }

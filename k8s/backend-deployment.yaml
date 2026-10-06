@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intel2doc-backend
+  namespace: intel2doc
+spec:
+  replicas: 1
+
+  strategy:
+    type: Recreate
+
+  selector:
+    matchLabels:
+      app: intel2doc-backend
+
+  template:
+    metadata:
+      labels:
+        app: intel2doc-backend
+
+    spec:
+      containers:
+        - name: backend
+
+          image: 104680212681.dkr.ecr.ap-south-2.amazonaws.com/intel2doc-backend:v1
+
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8020
+
+          env:
+            - name: DATABASE_URL
+              value: "sqlite:////app/storage/intel2doc.sqlite3"
+
+            - name: CORS_ORIGINS
+              value: "*"
+
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8020
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8020
+            initialDelaySeconds: 30
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: intel2doc-storage

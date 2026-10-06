@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { exportScan, getExportTargets, type ExportTarget } from "../api";
 import type { DocumentResult, Extraction, SubDocumentResult } from "../types";
 import { Icon } from "./Icons";
+import { EngineBadge } from "./AiStatus";
 
 const pretty = (s: string) => s.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -128,6 +129,7 @@ export function ApprovedScreen({
         <h2>Document approved &amp; secured</h2>
         <p>Validated against all business rules and cleared for downstream processing.</p>
         <div className="approved-ref">Reference <b>{ref}</b></div>
+        <div className="approved-engine"><EngineBadge engine={sub.extraction.engine} /></div>
       </div>
 
       <div className="approved-body">
@@ -146,7 +148,7 @@ export function ApprovedScreen({
             <Row k="Rules passed" v={`${rulesPassed} / ${sub.rule_results.length}`} good />
             <Row k="Approved by" v={approver} />
             <Row k="Approved at" v={when} />
-            <Row k="Engine" v={sub.extraction.engine} />
+            <div className="ar-row"><span className="ar-k">Engine</span><span className="ar-v"><EngineBadge engine={sub.extraction.engine} /></span></div>
           </div>
           <div className="approved-actions">
             <button className="btn btn-primary" onClick={download}><Icon name="download" size={16} /> Download data (JSON)</button>
