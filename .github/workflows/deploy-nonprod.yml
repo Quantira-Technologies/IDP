@@ -29,36 +29,47 @@ env:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - nonprod
+      - eks
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Show deployment information
+      - name: Configure deployment variables
+        shell: bash
         run: |
-          echo "Commit: $GITHUB_SHA"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Runner: $RUNNER_NAME"
+          set -euo pipefail
 
-      - name: Configure variables
-        run: |
-          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE_TAG="${GITHUB_SHA::7}"
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-          echo "IMAGE_TAG=${SHORT_SHA}" >> "$GITHUB_ENV"
+          BACKEND_IMAGE="${ECR_REGISTRY}/${BACKEND_REPO}:${IMAGE_TAG}"
+          FRONTEND_IMAGE="${ECR_REGISTRY}/${FRONTEND_REPO}:${IMAGE_TAG}"
 
-          echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
+          echo "ECR_REGISTRY=${ECR_REGISTRY}" >> "$GITHUB_ENV"
+          echo "BACKEND_IMAGE=${BACKEND_IMAGE}" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=${FRONTEND_IMAGE}" >> "$GITHUB_ENV"
 
-          echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${SHORT_SHA}" >> "$GITHUB_ENV"
-
-          echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${SHORT_SHA}" >> "$GITHUB_ENV"
+          echo "Deploying commit: ${GITHUB_SHA}"
+          echo "Image tag: ${IMAGE_TAG}"
 
       - name: Verify AWS identity
+        shell: bash
         run: |
+          set -euo pipefail
           aws sts get-caller-identity
 
       - name: Login to Amazon ECR
+        shell: bash
         run: |
+          set -euo pipefail
+
           aws ecr get-login-password \
             --region "$AWS_REGION" \
           | docker login \
@@ -66,70 +77,199 @@ jobs:
             --password-stdin "$ECR_REGISTRY"
 
       - name: Configure kubectl
+        shell: bash
         run: |
+          set -euo pipefail
+
           aws eks update-kubeconfig \
             --name "$EKS_CLUSTER" \
             --region "$AWS_REGION"
 
+          kubectl config current-context
           kubectl get nodes
 
-      - name: Build backend image
+      - name: Verify Kubernetes access
+        shell: bash
         run: |
+          set -euo pipefail
+
+          kubectl auth can-i get pods \
+            -n "$K8S_NAMESPACE"
+
+          kubectl auth can-i update deployments \
+            -n "$K8S_NAMESPACE"
+
+      - name: Build backend image
+        shell: bash
+        run: |
+          set -euo pipefail
+
           docker build \
             -t "$BACKEND_IMAGE" \
             ./backend
 
       - name: Push backend image
+        shell: bash
         run: |
+          set -euo pipefail
+
           docker push "$BACKEND_IMAGE"
 
       - name: Build frontend image
+        shell: bash
         run: |
+          set -euo pipefail
+
           docker build \
             --build-arg VITE_API_BASE="" \
             -t "$FRONTEND_IMAGE" \
             ./frontend
 
       - name: Push frontend image
+        shell: bash
         run: |
+          set -euo pipefail
+
           docker push "$FRONTEND_IMAGE"
 
-      - name: Deploy backend to EKS
+      - name: Verify images exist in ECR
+        shell: bash
         run: |
+          set -euo pipefail
+
+          echo "Checking backend image..."
+          aws ecr describe-images \
+            --repository-name "$BACKEND_REPO" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --region "$AWS_REGION" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text
+
+          echo "Checking frontend image..."
+          aws ecr describe-images \
+            --repository-name "$FRONTEND_REPO" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --region "$AWS_REGION" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text
+
+      - name: Show images before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Backend image:"
+          echo "$BACKEND_IMAGE"
+
+          echo "Frontend image:"
+          echo "$FRONTEND_IMAGE"
+
+      - name: Deploy backend
+        shell: bash
+        run: |
+          set -euo pipefail
+
           kubectl set image \
             deployment/"$BACKEND_DEPLOYMENT" \
             backend="$BACKEND_IMAGE" \
             -n "$K8S_NAMESPACE"
 
       - name: Wait for backend rollout
+        shell: bash
         run: |
+          set -euo pipefail
+
           kubectl rollout status \
             deployment/"$BACKEND_DEPLOYMENT" \
             -n "$K8S_NAMESPACE" \
             --timeout=300s
 
-      - name: Deploy frontend to EKS
+      - name: Deploy frontend
+        shell: bash
         run: |
+          set -euo pipefail
+
           kubectl set image \
             deployment/"$FRONTEND_DEPLOYMENT" \
             frontend="$FRONTEND_IMAGE" \
             -n "$K8S_NAMESPACE"
 
       - name: Wait for frontend rollout
+        shell: bash
         run: |
+          set -euo pipefail
+
           kubectl rollout status \
             deployment/"$FRONTEND_DEPLOYMENT" \
             -n "$K8S_NAMESPACE" \
             --timeout=300s
 
-      - name: Show deployed resources
+      - name: Verify deployed images
+        shell: bash
         run: |
+          set -euo pipefail
+
+          echo "Backend deployed image:"
+          kubectl get deployment "$BACKEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" \
+            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+
+          echo "Frontend deployed image:"
+          kubectl get deployment "$FRONTEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" \
+            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+
+      - name: Show Kubernetes resources
+        shell: bash
+        run: |
+          set -euo pipefail
+
           kubectl get deployment,pods,svc,ingress \
-            -n "$K8S_NAMESPACE"
+            -n "$K8S_NAMESPACE" \
+            -o wide
 
       - name: Verify backend health
+        shell: bash
         run: |
-          curl --fail \
+          set -euo pipefail
+
+          curl \
+            --fail \
+            --show-error \
+            --silent \
             --retry 10 \
             --retry-delay 5 \
+            --retry-all-errors \
             https://idp.quantrexfintech.com/api/health
+
+      - name: Deployment summary
+        if: success()
+        shell: bash
+        run: |
+          echo "Deployment completed successfully"
+          echo "Environment : Non-Production"
+          echo "Cluster     : $EKS_CLUSTER"
+          echo "Namespace   : $K8S_NAMESPACE"
+          echo "Image Tag   : $IMAGE_TAG"
+          echo "Application : https://idp.quantrexfintech.com"
+
+      - name: Show diagnostics on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "===== Pods ====="
+          kubectl get pods -n "$K8S_NAMESPACE" -o wide || true
+
+          echo "===== Backend Deployment ====="
+          kubectl describe deployment "$BACKEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" || true
+
+          echo "===== Frontend Deployment ====="
+          kubectl describe deployment "$FRONTEND_DEPLOYMENT" \
+            -n "$K8S_NAMESPACE" || true
+
+          echo "===== Recent Events ====="
+          kubectl get events \
+            -n "$K8S_NAMESPACE" \
+            --sort-by='.lastTimestamp' \
+            | tail -50 || true
