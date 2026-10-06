@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from "./auth";
+import { I18nProvider } from "./i18n";
 import { Login } from "./pages/Login";
 import { AppShell } from "./shell/AppShell";
 import { Icon } from "./components/Icons";
@@ -21,8 +22,10 @@ function Gate() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <Gate />
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        <Gate />
+      </AuthProvider>
+    </I18nProvider>
   );
 }

@@ -66,7 +66,7 @@ def health() -> dict:
         "assets": assets_mod.list_assets(),
     }
     # Only probe Ollama when it's the selected engine (keeps mock demos fast).
-    if settings.extractor == "ollama":
+    if settings.extractor in ("ollama", "ollama_text"):
         body["ollama"] = ollama_client.status()
     return body
 

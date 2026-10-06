@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: intel2doc
+  namespace: intel2doc
+
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-2:104680212681:certificate/ead22598-1116-4a69-8624-4ccfd70b24e0"
+
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+spec:
+  ingressClassName: alb
+
+  rules:
+    - host: idp.quantrexfintech.com
+      http:
+        paths:
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: intel2doc-backend
+                port:
+                  number: 8020
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: intel2doc-frontend
+                port:
+                  number: 80

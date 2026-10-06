@@ -1,5 +1,5 @@
 {
-  "min_confidence": 0.7,
+  "min_confidence": 0.63,
   "auto_reject_unknown": false,
   "policies": [
     {
@@ -14,7 +14,7 @@
     },
     {
       "doc_type": "house_air_waybill",
-      "action": "review",
+      "action": "auto_approve",
       "note": "Auto-clear when weights reconcile."
     },
     {

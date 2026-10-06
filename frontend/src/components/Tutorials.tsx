@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./Icons";
+import { useI18n } from "../i18n";
 
 interface Step {
   id: string;
@@ -44,6 +45,7 @@ export function Tutorials({
   onNav: (id: string) => void;
   onDrawer: (open: boolean) => void;
 }) {
+  const { t } = useI18n();
   const perms = useMemo(() => new Set(permissions), [permissions]);
   const steps = useMemo(
     () => STEPS.filter((s) => (s.permission === null || perms.has(s.permission)) && (!s.nav || navIds.includes(s.nav))),
@@ -140,15 +142,15 @@ export function Tutorials({
     <div className={`tour-tip ${centered ? "" : "floating"}`} ref={tipRef} style={centered ? undefined : { top: pos.top, left: pos.left }}>
       <div className="tour-tip-hero">
         <div className="tut-step-ic"><Icon name={step.icon} size={22} /></div>
-        <h3>{step.title}</h3>
-        <p>{step.body}</p>
+        <h3>{t(step.title)}</h3>
+        <p>{t(step.body)}</p>
       </div>
       <div className="tut-foot">
         <div className="tut-dots">{steps.map((s, i) => <span key={s.id} className={`tut-dot ${i === idx ? "on" : ""}`} />)}</div>
         <div style={{ flex: 1 }} />
-        <button className="btn btn-ghost" onClick={finish}>Skip</button>
-        {idx > 0 && <button className="btn" onClick={() => setIdx((i) => i - 1)}>Back</button>}
-        <button className="btn btn-primary" onClick={() => (last ? finish() : setIdx((i) => i + 1))}>{last ? "Done" : "Next"}</button>
+        <button className="btn btn-ghost" onClick={finish}>{t("Skip")}</button>
+        {idx > 0 && <button className="btn" onClick={() => setIdx((i) => i - 1)}>{t("Back")}</button>}
+        <button className="btn btn-primary" onClick={() => (last ? finish() : setIdx((i) => i + 1))}>{last ? t("Done") : t("Next")}</button>
       </div>
     </div>
   );
