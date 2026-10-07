@@ -73,8 +73,8 @@ const AR: Record<string, string> = {
   // ---- Documents ----
   "Upload document": "رفع مستند",
   "Drop a document here or click to upload": "أفلت مستندًا هنا أو انقر للرفع",
-  "JPG, PNG or PDF · auto-cleaned & fully OCR'd · QR codes captured separately":
-    "JPG أو PNG أو PDF · تنظيف تلقائي وتعرّف ضوئي كامل · التقاط رموز QR بشكل منفصل",
+  "JPG, PNG, PDF or Word (DOCX) · auto-cleaned & fully OCR'd · QR codes captured separately":
+    "JPG أو PNG أو PDF أو وورد (DOCX) · تنظيف تلقائي وتعرّف ضوئي كامل · التقاط رموز QR بشكل منفصل",
   "Past scans": "عمليات المسح السابقة",
   "Folders": "المجلدات",
   "All scans": "كل عمليات المسح",
@@ -175,6 +175,88 @@ const AR: Record<string, string> = {
   "Replay anytime": "أعد التشغيل في أي وقت",
   "Click here whenever you want to run this tour again. That's it — enjoy!":
     "انقر هنا متى أردت إعادة هذه الجولة. هذا كل شيء — نتمنى لك تجربة ممتعة!",
+
+  // ---- Document types (prettified) ----
+  "Commercial Invoice": "فاتورة تجارية",
+  "Certificate Of Origin": "شهادة منشأ",
+  "House Air Waybill": "بوليصة شحن جوي",
+  "Customs Declaration": "إقرار جمركي",
+  "Purchase Order": "أمر شراء",
+  "Goods Receipt Note": "إشعار استلام بضائع",
+  "Vendor Invoice": "فاتورة مورّد",
+  "Gst Certificate": "شهادة ضريبة",
+  "Bank Statement": "كشف حساب بنكي",
+  "Unknown": "غير معروف",
+
+  // ---- Workflows (prettified) ----
+  "Customs": "الجمارك",
+  "Po2Pay": "الشراء حتى الدفع",
+  "Contracts": "العقود",
+  "Finance": "المالية",
+
+  // ---- Route / status badges ----
+  "auto": "تلقائي",
+  "approved": "معتمد",
+  "review": "مراجعة",
+  "rejected": "مرفوض",
+  "auto_approved": "موافق عليه تلقائيًا",
+  "needs_review": "بحاجة لمراجعة",
+  "Auto-approved by policy": "موافق عليه تلقائيًا حسب السياسة",
+
+  // ---- Countries ----
+  "China": "الصين", "India": "الهند", "United Arab Emirates": "الإمارات العربية المتحدة",
+  "Germany": "ألمانيا", "United States": "الولايات المتحدة", "Turkey": "تركيا",
+  "Egypt": "مصر", "South Korea": "كوريا الجنوبية", "Italy": "إيطاليا", "Japan": "اليابان",
+  "Poland": "بولندا", "Brazil": "البرازيل", "Saudi Arabia": "السعودية", "Bahrain": "البحرين",
+  "Kuwait": "الكويت", "Qatar": "قطر", "Oman": "عُمان", "Jordan": "الأردن", "Iraq": "العراق",
+  "Spain": "إسبانيا", "France": "فرنسا",
+
+  // ---- Analytics / dashboard extras ----
+  "Rejected": "مرفوض",
+  "people": "أشخاص",
+  "No data yet": "لا توجد بيانات بعد",
+  "origin → destination": "المنشأ ← الوجهة",
+  "lowest needs the most review": "الأدنى يحتاج أكبر قدر من المراجعة",
+  "Consignments by origin country": "الشحنات حسب بلد المنشأ",
+  "Busiest trade lanes": "أكثر مسارات التجارة ازدحامًا",
+  "Extraction confidence by origin country": "ثقة الاستخراج حسب بلد المنشأ",
+  "Confidence distribution": "توزيع الثقة",
+  "Top rule failures": "أبرز حالات فشل القواعد",
+  "Reviewer performance": "أداء المراجعين",
+  "Country": "الدولة", "Recommended": "موصى به",
+  "auto-clear": "تخليص تلقائي",
+
+  // ---- Business Rules page ----
+  "Auto-approve": "موافقة تلقائية",
+  "Review": "مراجعة",
+  "Reject": "رفض",
+  "Save changes": "حفظ التغييرات",
+  "Saved": "تم الحفظ",
+  "Minimum confidence for auto-approve": "الحد الأدنى للثقة للموافقة التلقائية",
+  "Documents below this are sent to review even if their type is auto-approve.":
+    "المستندات الأقل من هذا تُرسل للمراجعة حتى لو كان نوعها موافقة تلقائية.",
+  "View-only. These rules decide how your scans are routed — a tenant admin configures them.":
+    "للعرض فقط. هذه القواعد تحدّد كيفية توجيه عمليات المسح — يضبطها مدير المستأجر.",
+  "Guidance shown to officers…": "إرشادات تظهر للموظفين…",
+  "Rules saved": "تم حفظ القواعد",
+
+  // ---- Review panel ----
+  "Header fields": "الحقول الرئيسية",
+  "Line items": "عناصر السطور",
+  "Line": "سطر",
+  "Edit": "تعديل",
+  "fixed": "مُصحّح",
+  "Rejected by policy": "مرفوض حسب السياسة",
+  "Needs review": "بحاجة لمراجعة",
+  "min confidence": "أدنى ثقة",
+  "engine": "المحرك",
+  "Detected table": "جدول مُكتشف",
+  "rows": "صفوف",
+  "Full document text": "النص الكامل للمستند",
+  "lines": "أسطر",
+  "Copy all": "نسخ الكل",
+  "QR / barcodes": "رموز QR / الباركود",
+  "Decoded value": "القيمة المفكوكة",
 };
 
 export function applyLangToDocument(lang: Lang) {
@@ -192,11 +274,17 @@ interface I18nCtx {
   lang: Lang;
   dir: "rtl" | "ltr";
   t: (s: string) => string;
+  num: (v: string | number) => string;
   setLang: (l: Lang) => void;
   toggle: () => void;
 }
 
 const Ctx = createContext<I18nCtx | null>(null);
+
+const _ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+function toArabicDigits(v: string | number): string {
+  return String(v).replace(/[0-9]/g, (d) => _ARABIC_DIGITS[Number(d)]);
+}
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem(KEY) as Lang) || "en");
@@ -210,10 +298,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const toggle = useCallback(() => setLang(lang === "ar" ? "en" : "ar"), [lang, setLang]);
 
   const t = useCallback((s: string) => (lang === "ar" ? AR[s] ?? s : s), [lang]);
+  const num = useCallback((v: string | number) => (lang === "ar" ? toArabicDigits(v) : String(v)), [lang]);
 
   const value = useMemo<I18nCtx>(
-    () => ({ lang, dir: lang === "ar" ? "rtl" : "ltr", t, setLang, toggle }),
-    [lang, t, setLang, toggle]
+    () => ({ lang, dir: lang === "ar" ? "rtl" : "ltr", t, num, setLang, toggle }),
+    [lang, t, num, setLang, toggle]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

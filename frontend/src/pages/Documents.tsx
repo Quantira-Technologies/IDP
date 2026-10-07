@@ -34,7 +34,7 @@ const when = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "");
 
 export function Documents() {
   const { can, user } = useAuth();
-  const { t } = useI18n();
+  const { t, num } = useI18n();
   const [result, setResult] = useState<DocumentResult | null>(null);
   const [approved, setApproved] = useState(false);
   const [activeSub, setActiveSub] = useState(0);
@@ -161,13 +161,13 @@ export function Documents() {
             <div className="subtabs">
               {result.sub_documents.map((s, i) => (
                 <button key={i} className={`tab ${i === activeSub ? "active" : ""}`} onClick={() => { setActiveSub(i); setActiveField(null); }}>
-                  <span>{docEmoji(s.doc_type)}</span>{pretty(s.doc_type)}
+                  <span>{docEmoji(s.doc_type)}</span>{t(pretty(s.doc_type))}
                   <span className={`mark ${s.route === "auto_approved" ? "ok" : s.route === "rejected" ? "rej" : "warn"}`}>{s.route === "auto_approved" ? "✓" : s.route === "rejected" ? "✕" : "⚠"}</span>
                 </button>
               ))}
             </div>
             <div className="panel">
-              <div className="panel-head"><h3>{t("Source")} — {pretty(sub.doc_type)}</h3><EngineBadge engine={sub.extraction.engine} /></div>
+              <div className="panel-head"><h3>{t("Source")} — {t(pretty(sub.doc_type))}</h3><EngineBadge engine={sub.extraction.engine} /></div>
               <div className="panel-body"><PagePreview sub={sub} activeField={activeField} onPick={setActiveField} imageUrl={previewImage} /></div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export function Documents() {
         actions={canUpload && (
           <>
             <button className="btn btn-primary" onClick={() => fileRef.current?.click()}><Icon name="upload" size={17} /> {t("Upload document")}</button>
-            <input ref={fileRef} type="file" accept="image/*,.pdf" onChange={onUpload} hidden />
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onUpload} hidden />
           </>
         )}
       />
@@ -215,7 +215,7 @@ export function Documents() {
         <div className="dropzone" data-tour="dropzone" onClick={() => fileRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) onDropFile(f); }}>
           <div className="dz-icon"><Icon name="upload" size={30} /></div>
           <div className="dz-title">{t("Drop a document here or click to upload")}</div>
-          <div className="dz-sub">{t("JPG, PNG or PDF · auto-cleaned & fully OCR'd · QR codes captured separately")}</div>
+          <div className="dz-sub">{t("JPG, PNG, PDF or Word (DOCX) · auto-cleaned & fully OCR'd · QR codes captured separately")}</div>
         </div>
       )}
 
@@ -226,14 +226,14 @@ export function Documents() {
             <span className="folders-title">{t("Folders")}</span>
           </div>
           <button className={`folder ${activeFolder === "__all__" ? "active" : ""}`} onClick={() => setActiveFolder("__all__")}>
-            <Icon name="grid" size={16} /> {t("All scans")} <span className="fcount">{scans.length}</span>
+            <Icon name="grid" size={16} /> {t("All scans")} <span className="fcount">{num(scans.length)}</span>
           </button>
           <button className={`folder ${activeFolder === "__root__" ? "active" : ""}`} onClick={() => setActiveFolder("__root__")}>
             <Icon name="file" size={16} /> {t("Unfiled")}
           </button>
           {folders.map((f) => (
             <button key={f.id} className={`folder ${activeFolder === f.id ? "active" : ""}`} onClick={() => setActiveFolder(f.id)}>
-              <Icon name="folder" size={16} /> {f.name} <span className="fcount">{f.count}</span>
+              <Icon name="folder" size={16} /> {f.name} <span className="fcount">{num(f.count)}</span>
               <span className="fdel" onClick={(e) => { e.stopPropagation(); removeFolder(f.id); }} title={t("Delete folder")}><Icon name="trash" size={14} /></span>
             </button>
           ))}
@@ -252,9 +252,9 @@ export function Documents() {
                 <span className="scan-emoji">{docEmoji(s.source_name || s.doc_type)}</span>
                 <div className="scan-main" onClick={() => openScan(s.id)} style={{ cursor: "pointer" }}>
                   <div className="scan-name">{pretty(s.source_name || s.doc_type)}</div>
-                  <div className="scan-meta">{pretty(s.doc_type)} · {when(s.created_at)}</div>
+                  <div className="scan-meta">{t(pretty(s.doc_type))} · {when(s.created_at)}</div>
                 </div>
-                <span className={`scan-badge ${s.route}`}>{s.route === "auto_approved" ? (s.approved ? "approved" : "auto") : s.route === "rejected" ? "rejected" : "review"}</span>
+                <span className={`scan-badge ${s.route}`}>{s.route === "auto_approved" ? (s.approved ? t("approved") : t("auto")) : s.route === "rejected" ? t("rejected") : t("review")}</span>
                 <select value={s.folder_id ?? ""} onChange={(e) => onMove(s.id, e.target.value)} title="Move to folder"
                   style={{ padding: "6px 8px", border: "1px solid var(--line)", borderRadius: 8, background: "var(--panel-2)", color: "var(--ink)", fontSize: 12 }}>
                   <option value="">Unfiled</option>
@@ -284,14 +284,15 @@ export function PageHead({ title, subtitle, actions }: { title: string; subtitle
 }
 
 function RouteBanner({ sub }: { sub: SubDocumentResult }) {
+  const { t, num } = useI18n();
   const rejected = sub.route === "rejected";
   const ok = sub.route === "auto_approved";
   const cls = rejected ? "reject" : ok ? "ok" : "warn";
   return (
     <div className={`route ${cls}`}>
       <div className="r-top">
-        <span className="r-badge">{ok ? "✓ Auto-approved" : rejected ? "✕ Rejected by policy" : "⚠ Needs review"}</span>
-        <span className="r-meta">min confidence {(sub.min_confidence * 100).toFixed(0)}% · engine {sub.engine}</span>
+        <span className="r-badge">{ok ? `✓ ${t("Auto-approved")}` : rejected ? `✕ ${t("Rejected by policy")}` : `⚠ ${t("Needs review")}`}</span>
+        <span className="r-meta">{t("min confidence")} {num((sub.min_confidence * 100).toFixed(0))}% · {t("engine")} {sub.engine}</span>
       </div>
       {sub.route_reasons.length > 0 && <ul>{sub.route_reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>}
     </div>

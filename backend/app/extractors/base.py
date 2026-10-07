@@ -33,6 +33,9 @@ class RawDocument:
     pages: list[RawPage] = field(default_factory=list)
     image_bytes: bytes | None = None
     content_type: str | None = None
+    # True when `pages` text came from a real text layer (PDF text / DOCX) and is
+    # authoritative — extractors should use it directly instead of running OCR.
+    text_is_native: bool = False
 
     @property
     def text(self) -> str:
@@ -62,11 +65,17 @@ def get_extractor(raw: "RawDocument | None" = None) -> Extractor:
     """
     mode = settings.extractor
     has_image = raw is not None and raw.has_image
+    native_text = raw is not None and raw.text_is_native and bool(raw.text.strip())
 
     if mode == "ollama":
-        from .ollama_extractor import OllamaExtractor
+        if has_image:
+            from .ollama_extractor import OllamaExtractor
 
-        return OllamaExtractor()
+            return OllamaExtractor()
+        if native_text:
+            from .text_extractor import TextExtractor
+
+            return TextExtractor()
     if mode == "ollama_text":
         from .ollama_text_extractor import OllamaTextExtractor
 
@@ -75,6 +84,11 @@ def get_extractor(raw: "RawDocument | None" = None) -> Extractor:
         from .llm_extractor import LLMExtractor
 
         return LLMExtractor()
+    # OCR / auto / mock: a real text layer (digital PDF / DOCX) is authoritative.
+    if native_text and mode != "mock":
+        from .text_extractor import TextExtractor
+
+        return TextExtractor()
     if mode in ("ocr", "auto") and has_image:
         from .ocr_extractor import OCRExtractor, available
 

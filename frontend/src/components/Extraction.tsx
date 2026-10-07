@@ -3,11 +3,13 @@ import { exportScan, getExportTargets, type ExportTarget } from "../api";
 import type { DocumentResult, Extraction, SubDocumentResult } from "../types";
 import { Icon } from "./Icons";
 import { EngineBadge } from "./AiStatus";
+import { useI18n } from "../i18n";
 
 const pretty = (s: string) => s.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 /** A detected bill-of-materials / line-item grid rendered as a real table. */
 export function DetectedTable({ ex }: { ex: Extraction }) {
+  const { t, num } = useI18n();
   if (!ex.line_items || ex.line_items.length === 0) return null;
   const cols = Array.from(
     ex.line_items.reduce((set, li) => {
@@ -18,7 +20,7 @@ export function DetectedTable({ ex }: { ex: Extraction }) {
   return (
     <div className="ex-block">
       <div className="ex-head">
-        <span className="ex-title"><Icon name="grid" size={15} /> Detected table · {ex.line_items.length} rows</span>
+        <span className="ex-title"><Icon name="grid" size={15} /> {t("Detected table")} · {num(ex.line_items.length)} {t("rows")}</span>
       </div>
       <div className="table-scroll">
         <table className="data-table">
@@ -40,6 +42,7 @@ export function DetectedTable({ ex }: { ex: Extraction }) {
 
 /** Every line captured from the page — the full, verbatim transcript. */
 export function FullText({ ex }: { ex: Extraction }) {
+  const { t, num } = useI18n();
   const [open, setOpen] = useState(true);
   if (!ex.full_text || ex.full_text.length === 0) return null;
   const copy = () => navigator.clipboard?.writeText(ex.full_text.map((t) => t.text).join("\n"));
@@ -47,16 +50,16 @@ export function FullText({ ex }: { ex: Extraction }) {
     <div className="ex-block">
       <div className="ex-head">
         <button className="ex-title as-btn" onClick={() => setOpen((o) => !o)}>
-          <Icon name={open ? "x" : "file"} size={15} /> Full document text · {ex.full_text.length} lines
+          <Icon name={open ? "x" : "file"} size={15} /> {t("Full document text")} · {num(ex.full_text.length)} {t("lines")}
         </button>
-        <button className="mini-btn" onClick={copy}>Copy all</button>
+        <button className="mini-btn" onClick={copy}>{t("Copy all")}</button>
       </div>
       {open && (
         <div className="fulltext">
-          {ex.full_text.map((t, i) => (
+          {ex.full_text.map((t2, i) => (
             <div className="ft-line" key={i}>
-              <span className="ft-text">{t.text}</span>
-              <span className={`ft-conf ${t.confidence < 0.8 ? "low" : ""}`}>{Math.round(t.confidence * 100)}%</span>
+              <span className="ft-text">{t2.text}</span>
+              <span className={`ft-conf ${t2.confidence < 0.8 ? "low" : ""}`}>{num(Math.round(t2.confidence * 100))}%</span>
             </div>
           ))}
         </div>
@@ -67,23 +70,24 @@ export function FullText({ ex }: { ex: Extraction }) {
 
 /** QR / barcodes found on the page — snapshot + decoded value, shown separately. */
 export function QRCodes({ ex }: { ex: Extraction }) {
+  const { t, num } = useI18n();
   if (!ex.qr_codes || ex.qr_codes.length === 0) return null;
   const isUrl = (s: string) => /^https?:\/\//i.test(s);
   return (
     <div className="ex-block">
       <div className="ex-head">
-        <span className="ex-title"><Icon name="grid" size={15} /> QR / barcodes · {ex.qr_codes.length}</span>
+        <span className="ex-title"><Icon name="grid" size={15} /> {t("QR / barcodes")} · {num(ex.qr_codes.length)}</span>
       </div>
       <div className="qr-grid">
         {ex.qr_codes.map((q, i) => (
           <div className="qr-card" key={i}>
             {q.image && <img src={q.image} alt="QR code" className="qr-img" />}
             <div className="qr-body">
-              <div className="qr-label">Decoded value</div>
+              <div className="qr-label">{t("Decoded value")}</div>
               <div className="qr-data">{q.data}</div>
               <div className="qr-actions">
-                <button className="mini-btn" onClick={() => navigator.clipboard?.writeText(q.data)}>Copy</button>
-                {isUrl(q.data) && <a className="mini-btn" href={q.data} target="_blank" rel="noreferrer">Open</a>}
+                <button className="mini-btn" onClick={() => navigator.clipboard?.writeText(q.data)}>{t("Copy")}</button>
+                {isUrl(q.data) && <a className="mini-btn" href={q.data} target="_blank" rel="noreferrer">{t("Open")}</a>}
               </div>
             </div>
           </div>

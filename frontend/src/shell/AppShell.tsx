@@ -48,6 +48,25 @@ export function AppShell() {
   const onNav = useCallback((id: string) => setActive(id), []);
   const onDrawer = useCallback((o: boolean) => setMobileOpen(o), []);
 
+  // BUG-003: trap the browser Back button so it can't break app routing.
+  // Re-push a history entry on every popstate, keeping the user inside the app.
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    const onPop = () => window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // BUG-002: let KPI cards (and other views) navigate via a decoupled event.
+  useEffect(() => {
+    const onNavEvent = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (id) setActive(id);
+    };
+    window.addEventListener("intel2doc:nav", onNavEvent as EventListener);
+    return () => window.removeEventListener("intel2doc:nav", onNavEvent as EventListener);
+  }, []);
+
   function toggleCollapse() {
     const next = !collapsed;
     setCollapsed(next);

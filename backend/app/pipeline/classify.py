@@ -28,7 +28,7 @@ def classify(raw: RawDocument) -> DocumentType:
 
     # OCR path: read the image text so keyword classification works on real uploads.
     text_source = raw.text
-    if settings.extractor in ("ocr", "auto") and raw.has_image:
+    if not text_source.strip() and raw.has_image and settings.extractor != "ollama":
         try:
             from ..extractors.ocr_extractor import available, ocr_text
 
@@ -40,8 +40,17 @@ def classify(raw: RawDocument) -> DocumentType:
             pass
 
     text = text_source.upper()
+    # --- Arabic keyword checks (case-insensitive upper() leaves Arabic intact) ---
+    if "شهادة منشأ" in text_source or "بلد المنشأ" in text_source:
+        return DocumentType.CERTIFICATE_OF_ORIGIN
+    if "كشف حساب" in text_source or "كشف الحساب" in text_source or "بيان حساب" in text_source:
+        return DocumentType.BANK_STATEMENT
+    if "إقرار جمركي" in text_source or "بيان جمركي" in text_source:
+        return DocumentType.CUSTOMS_DECLARATION
+    if "فاتورة تجارية" in text_source:
+        return DocumentType.COMMERCIAL_INVOICE
     # Customs Clearance
-    if "CERTIFICATE OF ORIGIN" in text or "ORIGIN CRITERION" in text:
+    if "CERTIFICATE OF ORIGIN" in text or "ORIGIN CRITERION" in text or "COUNTRY OF ORIGIN" in text:
         return DocumentType.CERTIFICATE_OF_ORIGIN
     if "AIR WAYBILL" in text or "HAWB" in text or "HOUSE AIR WAYBILL" in text:
         return DocumentType.HOUSE_AIR_WAYBILL

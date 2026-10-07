@@ -1,4 +1,5 @@
 /** Lightweight, dependency-free SVG charts tuned for the intel2doc palette. */
+import { useI18n } from "../i18n";
 
 const TEAL = "#1f9d72";
 const AMBER = "#d98324";
@@ -15,6 +16,7 @@ export function AreaChart({
   const w = 640;
   const h = height;
   const pad = { l: 8, r: 8, t: 12, b: 20 };
+  const { num } = useI18n();
   const max = Math.max(...data.map((d) => d.total), 1);
   const iw = w - pad.l - pad.r;
   const ih = h - pad.t - pad.b;
@@ -42,7 +44,7 @@ export function AreaChart({
       {data.map((d, i) =>
         i % 5 === 0 ? (
           <text key={i} x={x(i)} y={h - 4} fontSize="9" fill={INK} textAnchor="middle">
-            {d.date.slice(5)}
+            {num(d.date.slice(5))}
           </text>
         ) : null
       )}
@@ -57,6 +59,7 @@ export function BarChart({
   data: { label: string; value: number }[];
   color?: string;
 }) {
+  const { num } = useI18n();
   const max = Math.max(...data.map((d) => d.value), 1);
   return (
     <div style={{ display: "grid", gap: 8 }}>
@@ -68,7 +71,7 @@ export function BarChart({
           <div style={{ background: "#eef2f4", borderRadius: 8, height: 16, overflow: "hidden" }}>
             <div style={{ width: `${(d.value / max) * 100}%`, height: "100%", background: color, borderRadius: 8, transition: "width .6s cubic-bezier(.2,.8,.2,1)" }} />
           </div>
-          <span style={{ fontSize: 12, fontWeight: 700, color: "#16232b", textAlign: "right" }}>{d.value.toLocaleString()}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#16232b", textAlign: "right" }}>{num(d.value.toLocaleString())}</span>
         </div>
       ))}
     </div>
@@ -82,6 +85,7 @@ export function Donut({
   segments: { label: string; value: number; color: string }[];
   size?: number;
 }) {
+  const { num } = useI18n();
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   const r = size / 2 - 16;
   const c = 2 * Math.PI * r;
@@ -112,7 +116,7 @@ export function Donut({
           })}
         </g>
         <text x="50%" y="47%" textAnchor="middle" fontSize="22" fontWeight="800" fill="#16232b">
-          {Math.round((segments[0].value / total) * 100)}%
+          {num(Math.round((segments[0].value / total) * 100))}%
         </text>
         <text x="50%" y="60%" textAnchor="middle" fontSize="10" fill={INK}>
           {segments[0].label}
@@ -123,7 +127,7 @@ export function Donut({
           <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
             <span style={{ width: 11, height: 11, borderRadius: 3, background: s.color }} />
             <span style={{ color: INK }}>{s.label}</span>
-            <b style={{ marginLeft: "auto", color: "#16232b" }}>{s.value.toLocaleString()}</b>
+            <b style={{ marginLeft: "auto", color: "#16232b" }}>{num(s.value.toLocaleString())}</b>
           </div>
         ))}
       </div>

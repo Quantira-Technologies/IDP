@@ -35,6 +35,8 @@ class Store:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self._conn = sqlite3.connect(path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
+        self._images_dir = os.path.join(os.path.dirname(path) or ".", "uploads")
+        os.makedirs(self._images_dir, exist_ok=True)
         self._conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS results (
@@ -53,6 +55,7 @@ class Store:
             ("doc_type", "doc_type TEXT"), ("route", "route TEXT"),
             ("engine", "engine TEXT"), ("approved", "approved INTEGER DEFAULT 0"),
             ("folder_id", "folder_id TEXT"), ("created_at", "created_at TEXT"),
+            ("confidence", "confidence REAL DEFAULT 0"),
         ]:
             if col not in cols:
                 self._conn.execute(f"ALTER TABLE results ADD COLUMN {ddl}")
@@ -61,23 +64,38 @@ class Store:
     # ------------------------------------------------------------------ scans
     def save(self, result: DocumentResult) -> None:
         sub = result.sub_documents[0] if result.sub_documents else None
+        conf = round(sub.min_confidence, 4) if sub else 0.0
         with self._lock:
             self._cache[result.id] = result
             self._conn.execute(
                 """INSERT OR REPLACE INTO results
-                   (id, owner, source_name, doc_type, route, engine, approved, folder_id, created_at, payload)
-                   VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                   (id, owner, source_name, doc_type, route, engine, approved, folder_id, created_at, confidence, payload)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     result.id, result.owner, result.source_name,
                     sub.doc_type.value if sub else "unknown",
                     sub.route.value if sub else "needs_review",
                     sub.engine if sub else "",
                     1 if result.approved else 0,
-                    result.folder_id, result.created_at or _now(),
+                    result.folder_id, result.created_at or _now(), conf,
                     result.model_dump_json(),
                 ),
             )
             self._conn.commit()
+
+    # ------------------------------------------------------------ preview image
+    def save_image(self, doc_id: str, data: bytes | None) -> None:
+        if not data:
+            return
+        with open(os.path.join(self._images_dir, doc_id), "wb") as fh:
+            fh.write(data)
+
+    def image_bytes(self, doc_id: str) -> bytes | None:
+        path = os.path.join(self._images_dir, doc_id)
+        if not os.path.exists(path):
+            return None
+        with open(path, "rb") as fh:
+            return fh.read()
 
     def get(self, doc_id: str) -> DocumentResult | None:
         with self._lock:
@@ -91,7 +109,7 @@ class Store:
             return result
 
     def list_for_owner(self, owner: str, folder_id: str | None = "__any__") -> list[dict]:
-        q = "SELECT id, source_name, doc_type, route, engine, approved, folder_id, created_at FROM results WHERE owner=?"
+        q = "SELECT id, source_name, doc_type, route, engine, approved, folder_id, created_at, confidence FROM results WHERE owner=?"
         args: list = [owner]
         if folder_id != "__any__":
             if folder_id is None:
@@ -107,6 +125,7 @@ class Store:
                 "id": r["id"], "source_name": r["source_name"], "doc_type": r["doc_type"],
                 "route": r["route"], "engine": r["engine"], "approved": bool(r["approved"]),
                 "folder_id": r["folder_id"], "created_at": r["created_at"],
+                "confidence": r["confidence"] or 0.0,
             }
             for r in rows
         ]
@@ -131,6 +150,45 @@ class Store:
             self._conn.commit()
             self._cache.pop(doc_id, None)
             return cur.rowcount > 0
+
+    # -------------------------------------------------------------- analytics
+    def analytics_rows(self, owner: str | None = None) -> list[dict]:
+        """Lightweight rows for dashboard aggregation (optionally scoped to a user)."""
+        q = "SELECT doc_type, route, approved, created_at, confidence, owner FROM results"
+        args: list = []
+        if owner:
+            q += " WHERE owner=?"
+            args.append(owner)
+        with self._lock:
+            rows = self._conn.execute(q, args).fetchall()
+        return [
+            {
+                "doc_type": r["doc_type"] or "unknown",
+                "route": r["route"] or "needs_review",
+                "approved": bool(r["approved"]),
+                "created_at": r["created_at"] or "",
+                "confidence": r["confidence"] or 0.0,
+                "owner": r["owner"] or "",
+            }
+            for r in rows
+        ]
+
+    def detail_payloads(self, owner: str | None = None) -> list[dict]:
+        """Full result payloads (for country/rule-level analytics)."""
+        q = "SELECT payload FROM results"
+        args: list = []
+        if owner:
+            q += " WHERE owner=?"
+            args.append(owner)
+        with self._lock:
+            rows = self._conn.execute(q, args).fetchall()
+        out: list[dict] = []
+        for r in rows:
+            try:
+                out.append(json.loads(r["payload"]))
+            except (json.JSONDecodeError, TypeError):
+                continue
+        return out
 
     # ---------------------------------------------------------------- folders
     def list_folders(self, owner: str) -> list[dict]:

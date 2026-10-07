@@ -92,23 +92,23 @@ def list_users(_: dict = Depends(auth.require_permission("users.view"))) -> list
 # Analytics
 # --------------------------------------------------------------------------- #
 @router.get("/analytics/overview")
-def analytics_overview(_: dict = Depends(auth.require_permission("dashboard.view"))) -> dict:
-    return analytics.dashboard()
+def analytics_overview(user: dict = Depends(auth.require_permission("dashboard.view"))) -> dict:
+    return analytics.dashboard(user["id"])
 
 
 @router.post("/analytics/analyze")
-def analytics_analyze(_: dict = Depends(auth.require_permission("dashboard.analyze"))) -> dict:
-    return {"insights": analytics.insights()}
+def analytics_analyze(user: dict = Depends(auth.require_permission("dashboard.analyze"))) -> dict:
+    return {"insights": analytics.insights(user["id"])}
 
 
 @router.get("/analytics/geo")
-def analytics_geo(_: dict = Depends(auth.require_permission("analytics.view"))) -> dict:
-    return analytics.geo()
+def analytics_geo(user: dict = Depends(auth.require_permission("analytics.view"))) -> dict:
+    return analytics.geo(user["id"])
 
 
 @router.post("/analytics/geo/analyze")
-def analytics_geo_analyze(_: dict = Depends(auth.require_permission("analytics.analyze"))) -> dict:
-    return {"insights": analytics.geo_insights()}
+def analytics_geo_analyze(user: dict = Depends(auth.require_permission("analytics.analyze"))) -> dict:
+    return {"insights": analytics.geo_insights(user["id"])}
 
 
 # --------------------------------------------------------------------------- #

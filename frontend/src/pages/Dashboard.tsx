@@ -10,7 +10,7 @@ const pretty = (s: string) => s.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c
 
 export function Dashboard() {
   const { can, user } = useAuth();
-  const { t } = useI18n();
+  const { t, num, lang } = useI18n();
   const [data, setData] = useState<DashboardData | null>(null);
   const [insights, setInsights] = useState<Insight[] | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -31,11 +31,13 @@ export function Dashboard() {
     }
   }
 
+  const goDocs = () => window.dispatchEvent(new CustomEvent("intel2doc:nav", { detail: "documents" }));
+
   const s = data?.summary;
   return (
     <div className="page">
       <PageHead
-        title={`${t("Welcome")}, ${user?.name.split(" ")[0] ?? ""}`}
+        title={`${t("Welcome")}${lang === "ar" ? "، " : ", "}${user?.name.split(" ")[0] ?? ""}`}
         subtitle="Operational overview — last 30 days"
         actions={
           can("dashboard.analyze") && (
@@ -64,12 +66,12 @@ export function Dashboard() {
 
       {s && (
         <div className="kpis">
-          <Kpi label={t("Documents (30d)")} value={s.documents_30d.toLocaleString()} trend={`+${s.trend_pct}%`} icon="file" />
-          <Kpi label={t("Straight-through")} value={`${Math.round(s.straight_through_rate * 100)}%`} sub={`${s.auto_approved.toLocaleString()} ${t("auto-approved")}`} icon="check" tone="teal" />
-          <Kpi label={t("In review")} value={s.in_review.toLocaleString()} sub={t("awaiting a human")} icon="bell" tone="amber" />
-          <Kpi label={t("Avg confidence")} value={`${Math.round(s.avg_confidence * 100)}%`} sub={`${(s.accuracy * 100).toFixed(1)}% ${t("accuracy")}`} icon="chart" tone="blue" />
-          <Kpi label={t("Hours saved")} value={String(s.hours_saved_30d)} sub={t("vs. manual review")} icon="history" />
-          <Kpi label={t("Avg speed")} value={`${s.avg_processing_seconds}s`} sub={t("per document")} icon="sparkle" />
+          <Kpi label={t("Documents (30d)")} value={num(s.documents_30d.toLocaleString())} trend={`+${num(s.trend_pct)}%`} icon="file" onClick={goDocs} />
+          <Kpi label={t("Straight-through")} value={`${num(Math.round(s.straight_through_rate * 100))}%`} sub={`${num(s.auto_approved.toLocaleString())} ${t("auto-approved")}`} icon="check" tone="teal" onClick={goDocs} />
+          <Kpi label={t("In review")} value={num(s.in_review.toLocaleString())} sub={t("awaiting a human")} icon="bell" tone="amber" onClick={goDocs} />
+          <Kpi label={t("Avg confidence")} value={`${num(Math.round(s.avg_confidence * 100))}%`} sub={`${num((s.accuracy * 100).toFixed(1))}% ${t("accuracy")}`} icon="chart" tone="blue" onClick={goDocs} />
+          <Kpi label={t("Hours saved")} value={num(String(s.hours_saved_30d))} sub={t("vs. manual review")} icon="history" onClick={goDocs} />
+          <Kpi label={t("Avg speed")} value={`${num(s.avg_processing_seconds)}${lang === "ar" ? " ث" : "s"}`} sub={t("per document")} icon="sparkle" onClick={goDocs} />
         </div>
       )}
 
@@ -91,7 +93,7 @@ export function Dashboard() {
           <div className="panel">
             <div className="panel-head"><h3>{t("By document type")}</h3></div>
             <div className="panel-body">
-              <BarChart data={data.by_type.slice(0, 6).map((d) => ({ label: pretty(d.type), value: d.count }))} />
+              <BarChart data={data.by_type.slice(0, 6).map((d) => ({ label: t(pretty(d.type)), value: d.count }))} />
             </div>
           </div>
           <div className="panel">
@@ -106,9 +108,15 @@ export function Dashboard() {
   );
 }
 
-function Kpi({ label, value, sub, trend, icon, tone }: { label: string; value: string; sub?: string; trend?: string; icon: string; tone?: string }) {
+function Kpi({ label, value, sub, trend, icon, tone, onClick }: { label: string; value: string; sub?: string; trend?: string; icon: string; tone?: string; onClick?: () => void }) {
   return (
-    <div className={`kpi ${tone ?? ""}`}>
+    <div
+      className={`kpi ${tone ?? ""} ${onClick ? "kpi-click" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => (e.key === "Enter" || e.key === " ") && onClick() : undefined}
+    >
       <div className="kpi-ic"><Icon name={icon} size={18} /></div>
       <div className="kpi-label">{label}</div>
       <div className="kpi-value">{value}</div>

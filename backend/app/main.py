@@ -25,11 +25,12 @@ from .config import settings
 from .db import store
 from .extractors import ollama_client
 from .extractors.ocr_extractor import available as ocr_available
+from .ingest import ingest_upload
 from .models import CorrectionRequest, DocumentResult
 from .pipeline.orchestrator import process_document
 from .pipeline.route import route
 from .pipeline.validate import validate
-from .samples import DEMO_BUNDLES, demo_bundle, raw_from_upload
+from .samples import DEMO_BUNDLES, demo_bundle
 
 
 def _stamp(result: DocumentResult, user: dict) -> DocumentResult:
@@ -74,10 +75,23 @@ def health() -> dict:
 @app.post("/api/documents/process", response_model=DocumentResult, dependencies=[Depends(require_permission("documents.upload"))])
 async def process_upload(file: UploadFile = File(...), user: dict = Depends(current_user)) -> DocumentResult:
     content = await file.read()
-    raw = raw_from_upload(file.filename or "upload", content, file.content_type)
+    raw = ingest_upload(file.filename or "upload", content, file.content_type)
     result = _stamp(process_document(raw), user)
+    if raw.has_image and raw.image_bytes:
+        store.save_image(result.id, raw.image_bytes)
+        result.image_url = f"/api/uploads/{result.id}/image"
     store.save(result)
     return result
+
+
+@app.get("/api/uploads/{doc_id}/image")
+def get_upload_image(doc_id: str) -> Response:
+    # No auth dependency: served directly to <img> tags in the browser.
+    data = store.image_bytes(doc_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="image not found")
+    media = "image/png" if data[:4] == b"\x89PNG" else "image/jpeg"
+    return Response(content=data, media_type=media)
 
 
 @app.get("/api/assets", response_model=list[str], dependencies=[Depends(require_permission("documents.view"))])

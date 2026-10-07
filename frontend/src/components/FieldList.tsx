@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Field, SubDocumentResult } from "../types";
+import { useI18n } from "../i18n";
 
 /** Editable list of extracted fields with per-field confidence + correction. */
 export function FieldList({
@@ -13,10 +14,11 @@ export function FieldList({
   onPick: (name: string) => void;
   onCorrect?: (fieldName: string, newValue: string, approve: boolean) => void;
 }) {
+  const { t, num } = useI18n();
   return (
     <div>
       {Object.values(sub.extraction.fields).length > 0 && (
-        <div className="field-group-title">Header fields</div>
+        <div className="field-group-title">{t("Header fields")}</div>
       )}
       {Object.values(sub.extraction.fields).map((f) => (
         <FieldRow
@@ -29,11 +31,11 @@ export function FieldList({
       ))}
 
       {sub.extraction.line_items.length > 0 && (
-        <div className="field-group-title">Line items</div>
+        <div className="field-group-title">{t("Line items")}</div>
       )}
       {sub.extraction.line_items.map((li, i) => (
         <div className="lineitem" key={i}>
-          <div className="li-label">Line {i + 1}</div>
+          <div className="li-label">{t("Line")} {num(i + 1)}</div>
           {Object.values(li.fields).map((f) => (
             <FieldRow
               key={f.name}
@@ -62,6 +64,7 @@ function FieldRow({
   onPick: () => void;
   onCorrect?: (newValue: string, approve: boolean) => void;
 }) {
+  const { t, num } = useI18n();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(field.value ?? ""));
   const low = field.confidence < 0.8;
@@ -80,14 +83,14 @@ function FieldRow({
       ) : (
         <div className="fval">
           {String(field.value ?? "—")}
-          {field.corrected && <span className="fixed">✓ fixed</span>}
+          {field.corrected && <span className="fixed">✓ {t("fixed")}</span>}
         </div>
       )}
       <span className={`conf ${low ? "low" : ""}`} title={`confidence ${pct}%`}>
         <span className="bar">
           <i style={{ width: `${pct}%` }} />
         </span>
-        <span className="pct">{pct}%</span>
+        <span className="pct">{num(pct)}%</span>
       </span>
       {!readOnly &&
         onCorrect &&
@@ -100,7 +103,7 @@ function FieldRow({
               setEditing(false);
             }}
           >
-            Save
+            {t("Save")}
           </button>
         ) : (
           <button
@@ -110,7 +113,7 @@ function FieldRow({
               setEditing(true);
             }}
           >
-            Edit
+            {t("Edit")}
           </button>
         ))}
     </div>

@@ -41,11 +41,11 @@ class Settings(BaseSettings):
     # `<host>/api/chat`; the OpenAI-compatible base is `<host>/v1`.
     #   EXTRACTOR=ollama       -> vision model reads the image directly (e.g. qwen2.5vl:3b)
     #   EXTRACTOR=ollama_text  -> OCR (Tesseract) -> text chat model (e.g. qwen2.5:1.5b)
-    ollama_host: str = "https://ai.quantrexfintech.com"
+    ollama_host: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5vl:3b"
     ollama_timeout: float = 120.0
     # Bearer token for a hosted gateway. Leave unset for a local Ollama server.
-    ollama_api_key: str = "e09566c78f3d80280dc17a32cdc422d45e284713150ad16968792798"
+    ollama_api_key: str | None = None
 
     # Folder of sample document images used by the /api/assets endpoints.
     assets_dir: str = "../assets"

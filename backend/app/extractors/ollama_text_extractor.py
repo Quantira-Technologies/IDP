@@ -74,40 +74,43 @@ class OllamaTextExtractor(Extractor):
     name = "ollama_text"
 
     def extract(self, raw: RawDocument, doc_type: DocumentType) -> Extraction:
-        # Offline / canned documents have no image — keep them on the deterministic
-        # mock path so demos and tests never depend on the network.
-        if not raw.has_image:
+        native = raw.text_is_native and bool(raw.text.strip())
+
+        # Build the non-AI base extraction + the text to feed the model.
+        if native:
+            from .text_extractor import TextExtractor
+
+            base: Extraction = TextExtractor().extract(raw, doc_type)
+            source_text = raw.text
+        elif raw.has_image:
+            from .ocr_extractor import OCRExtractor, available as ocr_available
+
+            if not ocr_available():
+                from .mock_extractor import MockExtractor
+
+                return MockExtractor().extract(raw, doc_type)
+            base = OCRExtractor().extract(raw, doc_type)
+            source_text = "\n".join(line.text for line in base.full_text)
+        else:
+            # No image and no real text (canned/demo bundle) → deterministic mock.
             from .mock_extractor import MockExtractor
 
             return MockExtractor().extract(raw, doc_type)
 
-        # A text model needs OCR text. Without Tesseract there's nothing to feed it,
-        # so fall back to mock rather than hard-failing the upload.
-        from .ocr_extractor import OCRExtractor, available as ocr_available
-
-        if not ocr_available():
-            from .mock_extractor import MockExtractor
-
-            return MockExtractor().extract(raw, doc_type)
-
-        # 1) OCR the page for text + lines + QR.
-        base: Extraction = OCRExtractor().extract(raw, doc_type)
-        ocr_text = "\n".join(line.text for line in base.full_text)
-
-        if not ocr_text.strip():
+        if not source_text.strip():
             return base
 
-        # 2) Ask the chat model to structure the OCR text; fall back to OCR on error.
+        # Ask the chat model to structure the text; fall back to the base on error.
         model = settings.ollama_model
         try:
-            messages = text_extraction_prompt(doc_type, ocr_text)
+            messages = text_extraction_prompt(doc_type, source_text)
             response = ollama_client.generate_chat(messages, want_json=True)
             result = parse_extraction(response, doc_type, engine=f"ollama-text:{model}")
         except Exception as exc:  # noqa: BLE001 — never hard-fail an upload
-            base.engine = f"ocr (AI fallback: {type(exc).__name__})"
+            base.engine = f"{base.engine} (AI fallback: {type(exc).__name__})"
             return base
 
-        # 3) Enrich LLM fields with OCR source (bbox) and carry over verbatim capture.
+        # Enrich LLM fields with source (bbox) and carry over verbatim capture.
         _assign_bboxes(result.fields, base.full_text)
         result.full_text = base.full_text
         result.qr_codes = base.qr_codes
@@ -115,7 +118,7 @@ class OllamaTextExtractor(Extractor):
         if not result.line_items:
             result.line_items = base.line_items
         if not result.fields:
-            # Model returned nothing usable — keep OCR's fields so the UI isn't empty.
+            # Model returned nothing usable — keep the base fields so the UI isn't empty.
             result.fields = base.fields
-            result.engine = f"ocr (AI returned no fields) · {model}"
+            result.engine = f"{base.engine} (AI returned no fields)"
         return result
