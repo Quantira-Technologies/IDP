@@ -4,7 +4,7 @@ const env = (import.meta as unknown as {
   env: { VITE_API_BASE?: string };
 }).env;
 
-const API_BASE = env.VITE_API_BASE || "http://localhost:8020";
+const API_BASE = env.VITE_API_BASE || "https://idp.quantrexfintech.com";
 export const apiBase = API_BASE;
 
 const TOKEN_KEY = "intel2doc_token";
