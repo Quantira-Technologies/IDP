@@ -11,8 +11,10 @@ RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' \
     && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0t64 \
+        libzbar0t64 \
         tesseract-ocr \
         tesseract-ocr-eng \
+        tesseract-ocr-ara \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

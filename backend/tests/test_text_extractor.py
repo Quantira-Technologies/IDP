@@ -48,3 +48,13 @@ def test_text_extractor_populates_full_text_and_engine():
     assert ex.engine.startswith("text:")
     assert len(ex.full_text) >= 5
     assert ex.fields  # real fields, not empty
+
+
+def test_default_extractor_never_serves_mock_for_real_uploads(monkeypatch):
+    # Deployments ship no .env, so the code default must extract real content.
+    from app.config import Settings
+    from app.extractors import base
+
+    monkeypatch.setattr(base, "settings", Settings(_env_file=None))
+    raw = RawDocument(name="stmt.docx", pages=[RawPage(0, _BANK_EN)], text_is_native=True)
+    assert base.get_extractor(raw).name == "text"
