@@ -7,8 +7,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # "mock" (offline, deterministic) or "ollama" (real vision LLM) or "llm".
-    extractor: str = "mock"
+    # mock | ocr | auto | ollama | ollama_text. "auto" = real OCR/PDF/DOCX extraction,
+    # the safe default for deployments where no .env is shipped.
+    extractor: str = "auto"
 
     # Fields / documents scoring below this are routed to human review.
     confidence_threshold: float = 0.80
