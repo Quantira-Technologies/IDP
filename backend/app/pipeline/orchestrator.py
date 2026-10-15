@@ -14,6 +14,7 @@ from ..extractors.base import RawDocument
 from ..models import (
     DocumentResult,
     Extraction,
+    RuleSeverity,
     SubDocumentResult,
     workflow_of,
 )
@@ -49,7 +50,8 @@ def process_document(raw: RawDocument) -> DocumentResult:
         # Step 6b: apply the tenant's business-rule / document policy.
         from ..business_rules import apply_policy
 
-        decision, policy_reasons = apply_policy(extraction.doc_type, decision, min_conf)
+        critical_failed = any(not r.passed and r.severity == RuleSeverity.CRITICAL for r in rule_results)
+        decision, policy_reasons = apply_policy(extraction.doc_type, decision, min_conf, critical_failed)
         reasons = reasons + policy_reasons
 
         sub_results.append(

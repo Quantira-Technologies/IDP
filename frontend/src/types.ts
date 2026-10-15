@@ -12,6 +12,7 @@ export interface Field {
   confidence: number;
   bbox: BoundingBox | null;
   corrected: boolean;
+  label?: string | null;
 }
 
 export interface LineItem {

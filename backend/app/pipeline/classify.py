@@ -41,14 +41,25 @@ def classify(raw: RawDocument) -> DocumentType:
 
     text = text_source.upper()
     # --- Arabic keyword checks (case-insensitive upper() leaves Arabic intact) ---
+    # Specific titles first: GRN / vendor invoices also mention a purchase order.
+    if "إشعار استلام" in text_source or "إشعار الاستلام" in text_source:
+        return DocumentType.GOODS_RECEIPT_NOTE
+    if "فاتورة المورد" in text_source or "فاتورة مورد" in text_source:
+        return DocumentType.VENDOR_INVOICE
     if "شهادة منشأ" in text_source or "بلد المنشأ" in text_source:
         return DocumentType.CERTIFICATE_OF_ORIGIN
+    if "بوليصة شحن جوي" in text_source:
+        return DocumentType.HOUSE_AIR_WAYBILL
     if "كشف حساب" in text_source or "كشف الحساب" in text_source or "بيان حساب" in text_source:
         return DocumentType.BANK_STATEMENT
     if "إقرار جمركي" in text_source or "بيان جمركي" in text_source:
         return DocumentType.CUSTOMS_DECLARATION
+    if "شهادة ضريبة" in text_source:
+        return DocumentType.GST_CERTIFICATE
     if "فاتورة تجارية" in text_source:
         return DocumentType.COMMERCIAL_INVOICE
+    if "أمر شراء" in text_source:
+        return DocumentType.PURCHASE_ORDER
     # Customs Clearance
     if "CERTIFICATE OF ORIGIN" in text or "ORIGIN CRITERION" in text or "COUNTRY OF ORIGIN" in text:
         return DocumentType.CERTIFICATE_OF_ORIGIN

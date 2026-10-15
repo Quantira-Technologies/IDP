@@ -38,7 +38,9 @@ def _policy_for(doc_type: str) -> dict | None:
     return next((p for p in _load().get("policies", []) if p["doc_type"] == doc_type), None)
 
 
-def apply_policy(doc_type: DocumentType, decision: RouteDecision, min_conf: float) -> tuple[RouteDecision, list[str]]:
+def apply_policy(
+    doc_type: DocumentType, decision: RouteDecision, min_conf: float, critical_failed: bool = False
+) -> tuple[RouteDecision, list[str]]:
     """Override the base routing decision using the tenant's document policy."""
     cfg = _load()
     reasons: list[str] = []
@@ -61,7 +63,7 @@ def apply_policy(doc_type: DocumentType, decision: RouteDecision, min_conf: floa
         return (RouteDecision.NEEDS_REVIEW if decision != RouteDecision.REJECTED else decision), reasons
     if action == "auto_approve":
         threshold = cfg.get("min_confidence", 0.8)
-        if decision == RouteDecision.NEEDS_REVIEW and min_conf >= threshold:
+        if decision == RouteDecision.NEEDS_REVIEW and min_conf >= threshold and not critical_failed:
             # Eligible for auto-approve, but only if no critical rule failed
             # (route() already keeps NEEDS_REVIEW when a critical rule fails).
             reasons.append(label + " (auto-approved by policy)")

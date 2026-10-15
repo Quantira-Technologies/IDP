@@ -135,4 +135,9 @@ export function Donut({
   );
 }
 
+export function ChartEmpty({ text }: { text: string }) {
+  const { t } = useI18n();
+  return <div className="empty chart-empty">{t(text)}</div>;
+}
+
 export { TEAL, AMBER, BLUE };

@@ -86,6 +86,8 @@ class Field(BaseModel):
     bbox: BoundingBox | None = None
     # Set true once a human corrects/approves the value in review.
     corrected: bool = False
+    # Label as written on the document (e.g. Arabic) when it differs from `name`.
+    label: str | None = None
 
 
 class LineItem(BaseModel):

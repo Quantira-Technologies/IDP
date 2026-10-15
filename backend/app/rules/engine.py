@@ -103,11 +103,17 @@ def _phrase_to_int(text: str) -> int | None:
     return total + current if matched else None
 
 
+_AMOUNT_WITH_UNIT = re.compile(r"(?:[A-Za-z\u0600-\u06FF]{1,4}\s*)?(-?\d+(?:\.\d+)?)\s*(?:[A-Za-z\u0600-\u06FF]{1,6})?")
+
+
 def _num(value) -> float | None:
+    text = str(value).replace(",", "").strip()
     try:
-        return float(str(value).replace(",", "").strip())
+        return float(text)
     except (TypeError, ValueError):
-        return None
+        # Accept a currency code or unit next to the number ("USD 24850.00", "1250 KG").
+        m = _AMOUNT_WITH_UNIT.fullmatch(text)
+        return float(m.group(1)) if m else None
 
 
 # GSTIN checksum (India). 15 chars: 2 state + 10 PAN + 1 entity + 'Z' + 1 check.

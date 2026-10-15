@@ -2,6 +2,7 @@
 
 Endpoints:
   POST /api/documents/process   upload a file (image/PDF) -> run the 6-step pipeline
+  POST /api/documents/preview   page-1 picture of an upload (shown while it is analysed)
   POST /api/demo/bundle         run the built-in invoice+CoO demo bundle
   POST /api/demo/{workflow}     run a workflow demo (customs|po2pay|contracts|finance)
   GET  /api/assets              list the sample document images in assets/
@@ -25,7 +26,8 @@ from .config import settings
 from .db import store
 from .extractors import ollama_client
 from .extractors.ocr_extractor import available as ocr_available
-from .ingest import ingest_upload
+from .extractors.text_extractor import locate_values
+from .ingest import ingest_upload, preview_png, render_text_page
 from .models import CorrectionRequest, DocumentResult
 from .pipeline.orchestrator import process_document
 from .pipeline.route import route
@@ -77,11 +79,43 @@ async def process_upload(file: UploadFile = File(...), user: dict = Depends(curr
     content = await file.read()
     raw = ingest_upload(file.filename or "upload", content, file.content_type)
     result = _stamp(process_document(raw), user)
-    if raw.has_image and raw.image_bytes:
-        store.save_image(result.id, raw.image_bytes)
+    page_image = raw.image_bytes if raw.has_image else raw.preview
+    if page_image:
+        store.save_image(result.id, page_image)
         result.image_url = f"/api/uploads/{result.id}/image"
     store.save(result)
     return result
+
+
+@app.post("/api/documents/preview", dependencies=[Depends(require_permission("documents.upload"))])
+async def preview_upload(file: UploadFile = File(...)) -> Response:
+    """Page-1 picture of a file, shown while the full analysis is still running."""
+    content = await file.read()
+    out = preview_png(file.filename or "upload", content, file.content_type)
+    if not out:
+        raise HTTPException(status_code=415, detail="no preview for this file")
+    data, media = out
+    return Response(content=data, media_type=media)
+
+
+def _backfill_page_image(result: DocumentResult) -> None:
+    """Word files scanned before page pictures existed: draw page 1 from the stored text."""
+    if result.image_url or len(result.sub_documents) != 1:
+        return
+    if not (result.source_name or "").lower().endswith(".docx"):
+        return
+    extraction = result.sub_documents[0].extraction
+    lines = [ln.text for ln in extraction.full_text if ln.text.strip()]
+    try:
+        png, boxes = render_text_page(lines)
+    except Exception:
+        return
+    if not png:
+        return
+    locate_values(extraction.fields, extraction.line_items, extraction.full_text, boxes)
+    store.save_image(result.id, png)
+    result.image_url = f"/api/uploads/{result.id}/image"
+    store.save(result)
 
 
 @app.get("/api/uploads/{doc_id}/image")
@@ -158,6 +192,7 @@ def get_document(doc_id: str, user: dict = Depends(current_user)) -> DocumentRes
     result = store.get(doc_id)
     if not result or (result.owner and result.owner != user["id"]):
         raise HTTPException(status_code=404, detail="document not found")
+    _backfill_page_image(result)
     return result
 
 

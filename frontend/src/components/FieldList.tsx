@@ -72,7 +72,7 @@ function FieldRow({
 
   return (
     <div className={`field ${active ? "active" : ""}`} onClick={onPick}>
-      <div className="fname">{field.name}</div>
+      <div className="fname">{field.label || field.name}</div>
       {editing ? (
         <input
           value={draft}

@@ -256,7 +256,11 @@ class OCRExtractor(Extractor):
         if not raw.has_image:
             return Extraction(doc_type=doc_type, engine="ocr", fields={}, line_items=[])
 
-        lines, _w, _h = _ocr_lines(raw.image_bytes)
+        try:
+            lines, _w, _h = _ocr_lines(raw.image_bytes)
+        except Exception:
+            # Undecodable / truncated image: empty result for human review, never a crash.
+            return Extraction(doc_type=doc_type, engine="ocr (unreadable image)", fields={}, line_items=[])
 
         fields = _header_fields(lines, doc_type)
         table_columns, line_items = _detect_table(lines)
