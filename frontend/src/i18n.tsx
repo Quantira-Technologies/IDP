@@ -191,6 +191,7 @@ const AR: Record<string, string> = {
   // ---- Workflows (prettified) ----
   "Customs": "الجمارك",
   "Po2Pay": "الشراء حتى الدفع",
+  "Po2pay": "الشراء حتى الدفع",
   "Contracts": "العقود",
   "Finance": "المالية",
 
@@ -257,6 +258,52 @@ const AR: Record<string, string> = {
   "Copy all": "نسخ الكل",
   "QR / barcodes": "رموز QR / الباركود",
   "Decoded value": "القيمة المفكوكة",
+
+  // ---- Analytics page ----
+  "Generate insights": "إنشاء الرؤى",
+  "Route to review": "تحويل للمراجعة",
+  "Auto-clear eligible": "مؤهل للتخليص التلقائي",
+  "Name": "الاسم", "Role": "الدور", "Processed": "تمت معالجته", "Corrections": "التصحيحات",
+  "Platform Admin": "مدير المنصة", "Tenant Admin": "مدير المستأجر", "Director": "مدير",
+  "Manager": "مشرف", "Customs Officer": "موظف جمارك", "User": "مستخدم",
+  // Rule names (Top rule failures chart)
+  "Running Balance": "الرصيد الجاري", "Line Totals Sum": "مجموع إجماليات البنود",
+  "Amount In Words Matches": "تطابق المبلغ كتابةً", "Required Invoice Fields": "حقول الفاتورة المطلوبة",
+  "Hs Code Duty Consistency": "اتساق الرسوم مع رمز HS", "Coo Required Fields": "حقول شهادة المنشأ المطلوبة",
+  "Coo Invoice Cross Check": "مطابقة شهادة المنشأ مع الفاتورة", "Three Way Match": "المطابقة الثلاثية",
+  "Required Vendor Invoice Fields": "حقول فاتورة المورد المطلوبة", "Gstin Checksum": "التحقق من الرقم الضريبي",
+  "Required Hawb Fields": "حقول بوليصة الشحن المطلوبة", "Hawb Weight Consistency": "اتساق أوزان الشحن",
+  "Required Declaration Fields": "حقول الإقرار المطلوبة",
+  // Rule check cards (descriptions + severity)
+  "critical": "حرج", "warning": "تحذير",
+  "Sum of line amounts equals the grand total": "مجموع مبالغ البنود يساوي الإجمالي",
+  "Amount-in-words matches the numeric grand total": "المبلغ كتابةً يطابق الإجمالي الرقمي",
+  "Applied duty/tax rate matches the product's HS-code rate": "نسبة الرسوم المطبقة تطابق نسبة رمز HS للمنتج",
+  "All required invoice header fields are present": "جميع حقول رأس الفاتورة المطلوبة موجودة",
+  "Certificate of Origin references a known commercial invoice": "شهادة المنشأ تشير إلى فاتورة تجارية معروفة",
+  "Certificate of Origin invoice number matches the bundled invoice": "رقم فاتورة شهادة المنشأ يطابق الفاتورة المرفقة",
+  "All required Certificate of Origin fields are present": "جميع حقول شهادة المنشأ المطلوبة موجودة",
+  "Vendor invoice matches its purchase order and goods receipt": "فاتورة المورد تطابق أمر الشراء وإشعار الاستلام",
+  "All required vendor invoice header fields are present": "جميع حقول رأس فاتورة المورد المطلوبة موجودة",
+  "GSTIN is 15 chars with a valid check digit": "الرقم الضريبي من ١٥ خانة برقم تحقق صحيح",
+  "Statement running balance reconciles opening to closing": "الرصيد الجاري يطابق من الافتتاحي إلى الختامي",
+  "All required air-waybill routing fields are present": "جميع حقول توجيه بوليصة الشحن الجوي المطلوبة موجودة",
+  "Chargeable weight is at least the gross weight": "الوزن المحتسب لا يقل عن الوزن الإجمالي",
+  "All required traveler identity fields are present": "جميع حقول هوية المسافر المطلوبة موجودة",
+  "Page preview not available for this file": "معاينة الصفحة غير متاحة لهذا الملف",
+  "source page (simulated)": "صفحة المصدر (محاكاة)",
+  "no bounding boxes returned for this document": "لم يتم تحديد مواقع الحقول في هذا المستند",
+  "No origin countries yet — scan a certificate of origin or another document that states the country of origin.":
+    "لا توجد دول منشأ بعد — امسح شهادة منشأ أو أي مستند يذكر بلد المنشأ.",
+  "No trade lanes yet — a lane appears when a document states both the origin and the destination country.":
+    "لا توجد مسارات تجارية بعد — يظهر المسار عندما يذكر المستند بلد المنشأ وبلد الوجهة معاً.",
+  "No documents scanned yet — upload a document to see confidence scores.":
+    "لم يتم مسح أي مستند بعد — ارفع مستنداً لعرض درجات الثقة.",
+  "No rule failures — every scanned document passed its checks.": "لا توجد إخفاقات — اجتازت جميع المستندات الممسوحة فحوصاتها.",
+  "No documents processed yet.": "لم تتم معالجة أي مستند بعد.",
+  "No documents scanned yet.": "لم يتم مسح أي مستند بعد.",
+  "No documents in the last 30 days — upload a document to start the timeline.":
+    "لا توجد مستندات في آخر ٣٠ يوماً — ارفع مستنداً لبدء الخط الزمني.",
 };
 
 export function applyLangToDocument(lang: Lang) {

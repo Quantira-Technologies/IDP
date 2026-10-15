@@ -17,6 +17,8 @@ from ..models import DocumentType, Extraction
 class RawPage:
     number: int
     text: str
+    # (text, (x0, y0, x1, y1)) in 0-1 page coordinates, used to trace values to the page.
+    boxes: list[tuple[str, tuple[float, float, float, float]]] = field(default_factory=list)
 
 
 @dataclass
@@ -36,6 +38,12 @@ class RawDocument:
     # True when `pages` text came from a real text layer (PDF text / DOCX) and is
     # authoritative — extractors should use it directly instead of running OCR.
     text_is_native: bool = False
+    # Real user upload: never answered with demo/sample data, even if unreadable.
+    from_upload: bool = False
+    # Detected file type of an upload: "pdf" | "docx" | "image" | "text".
+    kind: str | None = None
+    # Display-only page picture (e.g. a rendered DOCX). Never read by extractors.
+    preview: bytes | None = None
 
     @property
     def text(self) -> str:
@@ -66,6 +74,12 @@ def get_extractor(raw: "RawDocument | None" = None) -> Extractor:
     mode = settings.extractor
     has_image = raw is not None and raw.has_image
     native_text = raw is not None and raw.text_is_native and bool(raw.text.strip())
+
+    if raw is not None and raw.from_upload and not has_image and not native_text:
+        # Nothing readable in the upload: return an empty result for human review.
+        from .text_extractor import TextExtractor
+
+        return TextExtractor()
 
     if mode == "ollama":
         if has_image:

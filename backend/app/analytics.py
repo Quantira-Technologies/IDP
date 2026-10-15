@@ -366,27 +366,39 @@ _COUNTRY_CODES = {
     "oman": "OM", "jordan": "JO", "iraq": "IQ", "spain": "ES", "france": "FR",
     "الهند": "IN", "الصين": "CN", "الإمارات العربية المتحدة": "AE", "السعودية": "SA",
     "ألمانيا": "DE", "تركيا": "TR", "مصر": "EG", "إيطاليا": "IT", "اليابان": "JP",
+    "الإمارات": "AE", "المملكة العربية السعودية": "SA", "الولايات المتحدة": "US",
+    "كوريا الجنوبية": "KR", "بولندا": "PL", "البرازيل": "BR", "البحرين": "BH", "الكويت": "KW",
+    "قطر": "QA", "عمان": "OM", "عُمان": "OM", "الأردن": "JO", "العراق": "IQ", "إسبانيا": "ES", "فرنسا": "FR",
 }
+# One display name per country (the UI translates it), so English and Arabic spellings merge.
+_CODE_NAMES: dict[str, str] = {}
+for _name, _code in _COUNTRY_CODES.items():
+    if _name.isascii() and len(_name) > 3:
+        _CODE_NAMES.setdefault(_code, _name.title())
 
 _ORIGIN_KEYS = ("country_of_origin", "origin", "nationality", "بلد المنشأ", "المنشأ")
-_DEST_KEYS = ("destination", "country_of_destination", "consignee", "بلد الوجهة", "الوجهة")
+_DEST_KEYS = ("destination", "country_of_destination", "بلد الوجهة", "الوجهة")
+# Airports / ports are places, not countries.
+_NOT_COUNTRY = ("airport", "port_of", "مطار", "ميناء")
 
 
 def _country_code(name: str) -> str:
-    key = (name or "").strip().lower()
-    if key in _COUNTRY_CODES:
-        return _COUNTRY_CODES[key]
-    ascii_name = "".join(c for c in name if c.isascii() and c.isalpha())
-    return ascii_name[:2].upper() or "??"
+    return _COUNTRY_CODES.get((name or "").strip().lower(), "")
+
+
+def _canonical_country(name: str) -> str:
+    return _CODE_NAMES.get(_country_code(name), name.strip())
 
 
 def _country_from_fields(fields: dict, keys) -> str | None:
     for fname, fval in fields.items():
         low = fname.lower()
+        if any(x in low or x in fname for x in _NOT_COUNTRY):
+            continue
         if any(k in low or k in fname for k in keys):
             val = fval.get("value") if isinstance(fval, dict) else fval
             if val and str(val).strip():
-                return str(val).strip()
+                return _canonical_country(str(val))
     return None
 
 
@@ -417,7 +429,7 @@ def real_geo(payloads: list[dict]) -> dict:
         key=lambda x: -x["count"],
     )
     trade_lanes = sorted(
-        ({"origin": o, "origin_code": _country_code(o), "destination": d, "count": n}
+        ({"origin": o, "origin_code": _country_code(o), "destination": d, "destination_code": _country_code(d), "count": n}
          for (o, d), n in lane_c.items()),
         key=lambda x: -x["count"],
     )

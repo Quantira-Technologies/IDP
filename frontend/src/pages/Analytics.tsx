@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getDashboard, getGeo, runAnalyze, type DashboardData, type GeoData, type Insight } from "../api";
 import { useAuth } from "../auth";
-import { BarChart } from "../components/Charts";
+import { useI18n } from "../i18n";
+import { BarChart, ChartEmpty } from "../components/Charts";
 import { Icon } from "../components/Icons";
 import { PageHead } from "./Documents";
 
@@ -13,6 +14,7 @@ function flag(code: string): string {
 
 export function Analytics() {
   const { can } = useAuth();
+  const { t, num } = useI18n();
   const [data, setData] = useState<DashboardData | null>(null);
   const [geo, setGeoData] = useState<GeoData | null>(null);
   const [insights, setInsights] = useState<Insight[] | null>(null);
@@ -43,7 +45,7 @@ export function Analytics() {
         actions={
           can("dashboard.analyze") && (
             <button className="btn btn-analyze" onClick={analyze} disabled={analyzing}>
-              {analyzing ? <span className="spinner" /> : <><Icon name="sparkle" size={17} /> Generate insights</>}
+              {analyzing ? <span className="spinner" /> : <><Icon name="sparkle" size={17} /> {t("Generate insights")}</>}
             </button>
           )
         }
@@ -67,50 +69,61 @@ export function Analytics() {
       {geo && (
         <div className="grid-2" style={{ marginBottom: 16 }}>
           <div className="panel">
-            <div className="panel-head"><h3>Consignments by origin country</h3></div>
+            <div className="panel-head"><h3>{t("Consignments by origin country")}</h3></div>
             <div className="panel-body">
-              <BarChart data={geo.by_origin.slice(0, 8).map((c) => ({ label: `${flag(c.code)} ${c.country}`, value: c.count }))} />
+              {geo.by_origin.length === 0 ? (
+                <ChartEmpty text="No origin countries yet — scan a certificate of origin or another document that states the country of origin." />
+              ) : (
+              <BarChart data={geo.by_origin.slice(0, 8).map((c) => ({ label: `${flag(c.code)} ${t(c.country)}`, value: c.count }))} />
+              )}
             </div>
           </div>
           <div className="panel">
-            <div className="panel-head"><h3>Busiest trade lanes</h3><span className="chip-label">origin → destination</span></div>
+            <div className="panel-head"><h3>{t("Busiest trade lanes")}</h3><span className="chip-label">{t("origin → destination")}</span></div>
             <div className="panel-body">
+              {geo.trade_lanes.length === 0 && (
+                <ChartEmpty text="No trade lanes yet — a lane appears when a document states both the origin and the destination country." />
+              )}
               {geo.trade_lanes.map((l) => (
-                <div className="geo-lane" key={l.origin}>
+                <div className="geo-lane" key={`${l.origin}→${l.destination}`}>
                   <div className="geo-route">
-                    <span className="flag">{flag(l.origin_code)}</span> {l.origin}
-                    <Icon name="chevron" size={14} /> <span className="flag">🇸🇦</span> {l.destination}
+                    <span className="flag">{flag(l.origin_code)}</span> {t(l.origin)}
+                    <Icon name="chevron" size={14} /> <span className="flag">{flag(l.destination_code ?? "")}</span> {t(l.destination)}
                   </div>
-                  <span className="geo-count">{l.count.toLocaleString()}</span>
+                  <span className="geo-count">{num(l.count.toLocaleString())}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="panel span-2">
-            <div className="panel-head"><h3>Extraction confidence by origin country</h3><span className="chip-label">lowest needs the most review</span></div>
+            <div className="panel-head"><h3>{t("Extraction confidence by origin country")}</h3><span className="chip-label">{t("lowest needs the most review")}</span></div>
             <div className="panel-body">
+              {geo.confidence_by_country.length === 0 ? (
+                <ChartEmpty text="No origin countries yet — scan a certificate of origin or another document that states the country of origin." />
+              ) : (
               <table className="tbl">
-                <thead><tr><th>Country</th><th>Documents</th><th>Avg confidence</th><th>Recommended</th></tr></thead>
+                <thead><tr><th>{t("Country")}</th><th>{t("Documents")}</th><th>{t("Avg confidence")}</th><th>{t("Recommended")}</th></tr></thead>
                 <tbody>
                   {geo.confidence_by_country.map((c) => (
                     <tr key={c.country}>
-                      <td><b>{flag(c.code)} {c.country}</b></td>
-                      <td>{c.docs.toLocaleString()}</td>
+                      <td><b>{flag(c.code)} {t(c.country)}</b></td>
+                      <td>{num(c.docs.toLocaleString())}</td>
                       <td>
                         <span className="conf inline">
                           <span className={`bar`}><i style={{ width: `${c.avg_confidence * 100}%`, background: c.avg_confidence < 0.8 ? "var(--amber)" : "var(--teal)" }} /></span>
-                          <span className="pct">{Math.round(c.avg_confidence * 100)}%</span>
+                          <span className="pct">{num(Math.round(c.avg_confidence * 100))}%</span>
                         </span>
                       </td>
                       <td>
                         <span className={`policy-chip ${c.avg_confidence < 0.8 ? "review" : "approve"}`}>
-                          {c.avg_confidence < 0.8 ? "Route to review" : "Auto-clear eligible"}
+                          {c.avg_confidence < 0.8 ? t("Route to review") : t("Auto-clear eligible")}
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           </div>
         </div>
@@ -119,41 +132,53 @@ export function Analytics() {
       {data && (
         <div className="grid-2">
           <div className="panel">
-            <div className="panel-head"><h3>Confidence distribution</h3></div>
+            <div className="panel-head"><h3>{t("Confidence distribution")}</h3></div>
             <div className="panel-body">
-              <BarChart color="#0b64d1" data={data.confidence_buckets.map((b) => ({ label: b.bucket, value: b.count }))} />
+              {data.confidence_buckets.every((b) => b.count === 0) ? (
+                <ChartEmpty text="No documents scanned yet — upload a document to see confidence scores." />
+              ) : (
+              <BarChart color="#0b64d1" data={data.confidence_buckets.map((b) => ({ label: num(b.bucket), value: b.count }))} />
+              )}
             </div>
           </div>
           <div className="panel">
-            <div className="panel-head"><h3>Top rule failures</h3></div>
+            <div className="panel-head"><h3>{t("Top rule failures")}</h3></div>
             <div className="panel-body">
-              <BarChart color="#d98324" data={data.top_failed_rules.map((r) => ({ label: pretty(r.rule), value: r.failures }))} />
+              {data.top_failed_rules.length === 0 ? (
+                <ChartEmpty text="No rule failures — every scanned document passed its checks." />
+              ) : (
+              <BarChart color="#d98324" data={data.top_failed_rules.map((r) => ({ label: t(pretty(r.rule)), value: r.failures }))} />
+              )}
             </div>
           </div>
           <div className="panel span-2">
-            <div className="panel-head"><h3>Reviewer performance</h3><span className="chip-label">{data.by_officer.length} people</span></div>
+            <div className="panel-head"><h3>{t("Reviewer performance")}</h3><span className="chip-label">{num(data.by_officer.length)} {t("people")}</span></div>
             <div className="panel-body">
+              {data.by_officer.length === 0 ? (
+                <ChartEmpty text="No documents processed yet." />
+              ) : (
               <table className="tbl">
                 <thead>
-                  <tr><th>Name</th><th>Role</th><th>Processed</th><th>Corrections</th><th>Avg confidence</th></tr>
+                  <tr><th>{t("Name")}</th><th>{t("Role")}</th><th>{t("Processed")}</th><th>{t("Corrections")}</th><th>{t("Avg confidence")}</th></tr>
                 </thead>
                 <tbody>
                   {data.by_officer.map((o) => (
                     <tr key={o.name}>
                       <td><b>{o.name}</b></td>
-                      <td><span className="pill-muted">{pretty(o.role)}</span></td>
-                      <td>{o.processed.toLocaleString()}</td>
-                      <td>{o.corrections}</td>
+                      <td><span className="pill-muted">{t(pretty(o.role))}</span></td>
+                      <td>{num(o.processed.toLocaleString())}</td>
+                      <td>{num(o.corrections)}</td>
                       <td>
                         <span className="conf inline">
                           <span className="bar"><i style={{ width: `${o.avg_confidence * 100}%` }} /></span>
-                          <span className="pct">{Math.round(o.avg_confidence * 100)}%</span>
+                          <span className="pct">{num(Math.round(o.avg_confidence * 100))}%</span>
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           </div>
         </div>

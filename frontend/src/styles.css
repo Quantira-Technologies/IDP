@@ -25,7 +25,8 @@
   --shadow-sm: 0 1px 3px rgba(10, 40, 40, .09);
   --shadow-lg: 0 24px 70px rgba(10, 40, 40, .18);
   --font: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --mono: "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+  /* Arabic-capable proportional fonts before `monospace` so Arabic letters stay joined. */
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Segoe UI", Tahoma, "Noto Sans Arabic", monospace;
 }
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
@@ -239,6 +240,7 @@ code { font-family: var(--mono); background: #eef2f4; padding: 1px 5px; border-r
 .preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .preview .sim-label { position: absolute; top: 10px; left: 12px; font-size: 11px; color: var(--ink-faint); background: rgba(255,255,255,.75); padding: 2px 7px; border-radius: 6px; }
 .preview .nobbox { position: absolute; bottom: 10px; left: 12px; font-size: 11px; color: #a06a10; background: rgba(255,255,255,.9); padding: 3px 8px; border-radius: 6px; border: 1px solid #f0dcae; }
+.bbox-layer { position: absolute; }
 .bbox { position: absolute; box-sizing: border-box; border: 2px solid var(--teal); background: rgba(16,163,127,.08); cursor: pointer; border-radius: 3px; transition: .1s; }
 .bbox.low { border-color: var(--amber); background: rgba(217,131,36,.08); }
 .bbox.active { border-color: var(--blue); background: rgba(11,100,209,.18); box-shadow: 0 0 0 2px rgba(11,100,209,.25); }
@@ -520,6 +522,7 @@ html[data-theme="dark"] .engine-badge.eb-ocr { color: #6aa9f0; }
 .scan-badge.rejected { background: var(--red-soft); color: #a2352b; }
 .scan-actions { display: flex; gap: 6px; }
 .empty { text-align: center; color: var(--ink-faint); padding: 40px 20px; }
+.chart-empty { padding: 26px 16px; font-size: 13px; line-height: 1.5; }
 
 /* ---------- User guide ---------- */
 .guide { display: grid; grid-template-columns: 230px 1fr; gap: 20px; align-items: start; }

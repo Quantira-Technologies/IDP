@@ -175,6 +175,14 @@ export async function processUpload(file: File): Promise<DocumentResult> {
   form.append("file", file);
   return req<DocumentResult>("/api/documents/process", { method: "POST", body: form });
 }
+/** Page-1 picture of a PDF / Word file (object URL), or null when none can be made. */
+export async function previewUpload(file: File): Promise<string | null> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API_BASE}/api/documents/preview`, { method: "POST", body: form, headers: headers() });
+  if (!res.ok) return null;
+  return URL.createObjectURL(await res.blob());
+}
 export const correctField = (
   docId: string,
   subIndex: number,
@@ -255,7 +263,7 @@ export const exportScan = (id: string, target: string) =>
 // ---------- Analytics (geo) ----------
 export interface GeoData {
   by_origin: { country: string; code: string; count: number }[];
-  trade_lanes: { origin: string; origin_code: string; destination: string; count: number }[];
+  trade_lanes: { origin: string; origin_code: string; destination: string; destination_code?: string; count: number }[];
   confidence_by_country: { country: string; code: string; avg_confidence: number; docs: number }[];
   destinations: { country: string; count: number }[];
   lowest_confidence: { country: string; avg_confidence: number }[];

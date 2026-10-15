@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   absoluteImageUrl, correctField, createFolder, deleteFolder, deleteScan,
-  getScan, listFolders, listScans, moveScan, processUpload,
+  getScan, listFolders, listScans, moveScan, previewUpload, processUpload,
   type Folder, type ScanMeta,
 } from "../api";
 import { useAuth } from "../auth";
@@ -44,6 +44,7 @@ export function Documents() {
   const [procImg, setProcImg] = useState<string | null>(null);
   const [localImg, setLocalImg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const viewRun = useRef(0);
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [scans, setScans] = useState<ScanMeta[]>([]);
@@ -60,6 +61,7 @@ export function Documents() {
   useEffect(() => { if (can("documents.view")) { refreshScans(); } }, [can, refreshScans]);
 
   async function runProcessing(name: string, image: string | null, fn: () => Promise<DocumentResult>) {
+    viewRun.current += 1;
     setError(null); setResult(null); setApproved(false); setProcName(name); setProcImg(image); setLocalImg(image);
     const started = Date.now();
     try {
@@ -74,19 +76,28 @@ export function Documents() {
     }
   }
 
+  function startUpload(file: File) {
+    const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
+    runProcessing(file.name, url, () => processUpload(file));
+    if (url) return;
+    // PDF / Word: show the page while it is being analysed.
+    const run = viewRun.current;
+    previewUpload(file)
+      .then((u) => { if (u && viewRun.current === run) { setProcImg(u); setLocalImg(u); } })
+      .catch(() => {});
+  }
   function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
-    runProcessing(file.name, url, () => processUpload(file));
+    startUpload(file);
     e.target.value = "";
   }
   function onDropFile(file: File) {
-    const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
-    runProcessing(file.name, url, () => processUpload(file));
+    startUpload(file);
   }
 
   async function openScan(id: string) {
+    viewRun.current += 1;
     setError(null); setApproved(false);
     try {
       const r = await getScan(id);
@@ -168,7 +179,7 @@ export function Documents() {
             </div>
             <div className="panel">
               <div className="panel-head"><h3>{t("Source")} — {t(pretty(sub.doc_type))}</h3><EngineBadge engine={sub.extraction.engine} /></div>
-              <div className="panel-body"><PagePreview sub={sub} activeField={activeField} onPick={setActiveField} imageUrl={previewImage} /></div>
+              <div className="panel-body"><PagePreview sub={sub} activeField={activeField} onPick={setActiveField} imageUrl={previewImage} realFile={sub.engine !== "mock"} /></div>
             </div>
           </div>
           <div className="review-right">
@@ -300,14 +311,15 @@ function RouteBanner({ sub }: { sub: SubDocumentResult }) {
 }
 
 function RuleResults({ sub }: { sub: SubDocumentResult }) {
+  const { t } = useI18n();
   if (sub.rule_results.length === 0) return null;
   return (
     <div className="rules">
       {sub.rule_results.map((r) => (
         <div className={`rule ${r.passed ? "pass" : "fail"}`} key={r.rule_id}>
           <span className="status">{r.passed ? "✓" : "✕"}</span>
-          <span className="desc">{r.description}<span className="detail">{r.detail}</span></span>
-          <span className="sev">{r.severity}</span>
+          <span className="desc">{t(r.description)}<span className="detail">{r.detail}</span></span>
+          <span className="sev">{t(r.severity)}</span>
         </div>
       ))}
     </div>

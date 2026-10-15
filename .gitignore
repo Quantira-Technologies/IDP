@@ -13,6 +13,7 @@ venv/
 
 # Data / uploads (never commit real documents or PII/PHI)
 backend/storage/
+storage/
 *.sqlite3
 *.db
 

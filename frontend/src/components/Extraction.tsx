@@ -25,7 +25,7 @@ export function DetectedTable({ ex }: { ex: Extraction }) {
       <div className="table-scroll">
         <table className="data-table">
           <thead>
-            <tr>{cols.map((c) => <th key={c}>{pretty(c)}</th>)}</tr>
+            <tr>{cols.map((c) => <th key={c}>{ex.line_items[0]?.fields[c]?.label || pretty(c)}</th>)}</tr>
           </thead>
           <tbody>
             {ex.line_items.map((li, i) => (

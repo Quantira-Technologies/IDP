@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getDashboard, runAnalyze, type DashboardData, type Insight } from "../api";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
-import { AreaChart, BarChart, Donut, TEAL, AMBER } from "../components/Charts";
+import { AreaChart, BarChart, ChartEmpty, Donut, TEAL, AMBER } from "../components/Charts";
 import { Icon } from "../components/Icons";
 import { PageHead } from "./Documents";
 
@@ -79,27 +79,45 @@ export function Dashboard() {
         <div className="grid-2">
           <div className="panel">
             <div className="panel-head"><h3>{t("Throughput")}</h3><span className="chip-label">{t("total vs auto-approved")}</span></div>
-            <div className="panel-body"><AreaChart data={data.timeseries} /></div>
+            <div className="panel-body">
+              {data.timeseries.every((d) => d.total === 0) ? (
+                <ChartEmpty text="No documents in the last 30 days — upload a document to start the timeline." />
+              ) : (
+                <AreaChart data={data.timeseries} />
+              )}
+            </div>
           </div>
           <div className="panel">
             <div className="panel-head"><h3>{t("Routing mix")}</h3></div>
             <div className="panel-body">
+              {data.routing.auto_approved + data.routing.in_review === 0 ? (
+                <ChartEmpty text="No documents scanned yet." />
+              ) : (
               <Donut segments={[
                 { label: t("Auto-approved"), value: data.routing.auto_approved, color: TEAL },
                 { label: t("In review"), value: data.routing.in_review, color: AMBER },
               ]} />
+              )}
             </div>
           </div>
           <div className="panel">
             <div className="panel-head"><h3>{t("By document type")}</h3></div>
             <div className="panel-body">
+              {data.by_type.length === 0 ? (
+                <ChartEmpty text="No documents scanned yet." />
+              ) : (
               <BarChart data={data.by_type.slice(0, 6).map((d) => ({ label: t(pretty(d.type)), value: d.count }))} />
+              )}
             </div>
           </div>
           <div className="panel">
             <div className="panel-head"><h3>{t("By workflow")}</h3></div>
             <div className="panel-body">
-              <BarChart color="#0b64d1" data={data.by_workflow.map((d) => ({ label: pretty(d.workflow), value: d.count }))} />
+              {data.by_workflow.length === 0 ? (
+                <ChartEmpty text="No documents scanned yet." />
+              ) : (
+              <BarChart color="#0b64d1" data={data.by_workflow.map((d) => ({ label: t(pretty(d.workflow)), value: d.count }))} />
+              )}
             </div>
           </div>
         </div>
