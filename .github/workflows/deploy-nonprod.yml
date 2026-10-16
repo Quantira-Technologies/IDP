@@ -239,7 +239,7 @@ jobs:
             --retry 10 \
             --retry-delay 5 \
             --retry-all-errors \
-            https://idp.quantrexfintech.com/api/health
+            https://idp.vikamtechnologies.co.in/api/health
 
       - name: Deployment summary
         if: success()
@@ -250,7 +250,7 @@ jobs:
           echo "Cluster     : $EKS_CLUSTER"
           echo "Namespace   : $K8S_NAMESPACE"
           echo "Image Tag   : $IMAGE_TAG"
-          echo "Application : https://idp.quantrexfintech.com"
+          echo "Application : https://idp.vikamtechnologies.co.in"
 
       - name: Show diagnostics on failure
         if: failure()
